@@ -1,0 +1,101 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8q5y6x7n4m2p"]
+
+[ext_resource type="Script" path="res://scripts/timeline_editor.gd" id="1_x4y5z"]
+
+[node name="TimelineEditor" type="Control"]
+layout_mode = 3
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("1_x4y5z")
+
+[node name="Timeline" type="TextureProgressBar" parent="."]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = -10.0
+offset_right = -220.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+nine_patch_stretch = true
+stretch_margin_left = 5
+stretch_margin_right = 5
+
+[node name="StartHandle" type="TextureRect" parent="Timeline"]
+layout_mode = 0
+offset_left = -10.0
+offset_top = -15.0
+offset_right = 10.0
+offset_bottom = 35.0
+mouse_default_cursor_shape = 10
+
+[node name="EndHandle" type="TextureRect" parent="Timeline"]
+layout_mode = 0
+offset_left = -10.0
+offset_top = -15.0
+offset_right = 10.0
+offset_bottom = 35.0
+mouse_default_cursor_shape = 10
+
+[node name="PositionIndicator" type="TextureRect" parent="Timeline"]
+layout_mode = 0
+offset_left = -2.0
+offset_top = -20.0
+offset_right = 2.0
+offset_bottom = 40.0
+
+[node name="SpeedControl" type="HSlider" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -30.0
+offset_right = -20.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
+min_value = 0.25
+max_value = 2.0
+step = 0.25
+value = 1.0
+
+[node name="FrameControls" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -50.0
+offset_right = -20.0
+offset_bottom = -30.0
+grow_horizontal = 0
+grow_vertical = 0
+alignment = 2
+
+[node name="PrevFrame" type="Button" parent="FrameControls"]
+layout_mode = 2
+text = "⏮"
+flat = true
+
+[node name="NextFrame" type="Button" parent="FrameControls"]
+layout_mode = 2
+text = "⏭"
+flat = true
+
+[connection signal="gui_input" from="Timeline" to="." method="_on_timeline_gui_input"]
+[connection signal="value_changed" from="SpeedControl" to="." method="_on_speed_changed"]
+[connection signal="pressed" from="FrameControls/PrevFrame" to="." method="prev_frame"]
+[connection signal="pressed" from="FrameControls/NextFrame" to="." method="next_frame"] 

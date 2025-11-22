@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Timeline Component</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #1e1e1e;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .timeline-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #2d2d2d;
+        }
+
+        /* Timeline Header */
+        .timeline-header {
+            background: #333;
+            padding: 15px 20px;
+            border-bottom: 1px solid #404040;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .timeline-title {
+            color: #4ecdc4;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .timeline-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .timeline-btn {
+            background: #404040;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .timeline-btn:hover {
+            background: #4ecdc4;
+            color: #1e1e1e;
+        }
+
+        .timeline-btn.active {
+            background: #4ecdc4;
+            color: #1e1e1e;
+        }
+
+        .timeline-btn:disabled {
+            background: #2a2a2a;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .time-display {
+            background: #1a1a1a;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 1rem;
+            color: #4ecdc4;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        /* Timeline Main Area */
+        .timeline-main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Track Labels */
+        .track-labels {
+            width: 120px;
+            background: #333;
+            border-right: 1px solid #404040;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .track-label {
+            height: 80px;
+            padding: 15px;
+            border-bottom: 1px solid #404040;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #333;
+        }
+
+        .track-label-text {
+            font-weight: 500;
+            color: #ccc;
+        }
+
+        .track-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .track-control-btn {
+            width: 24px;
+            height: 24px;
+            background: #404040;
+            border: none;
+            border-radius: 3px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .track-control-btn:hover {
+            background: #4ecdc4;
+            color: #1e1e1e;
+        }
+
+        .track-control-btn.active {
+            background: #4ecdc4;
+            color: #1e1e1e;
+        }
+
+        /* Timeline Canvas Area */
+        .timeline-canvas {
+            flex: 1;
+            position: relative;
+            overflow: auto;
+            background: #252525;
+        }
+
+        .timeline-ruler {
+            height: 40px;
+            background: #2d2d2d;
+            border-bottom: 1px solid #404040;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .ruler-content {
+            height: 100%;
+            position: relative;
+            min-width: 2000px;
+        }
+
+        .ruler-mark {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            border-left: 1px solid #555;
+            display: flex;
+            align-items: center;
+            padding-left: 5px;
+            font-size: 0.8rem;
+            color: #aaa;
+            font-family: monospace;
+        }
+
+        .ruler-mark.major {
+            border-left-color: #888;
+            color: #ccc;
+        }
+
+        .ruler-mark.second {
+            height: 60%;
+            top: 40%;
+        }
+
+        /* Timeline Tracks */
+        .timeline-tracks {
+            flex: 1;
+            position: relative;
+            min-height: 400px;
+        }
+
+        .timeline-track {
+            height: 80px;
+            border-bottom: 1px solid #404040;
+            position: relative;
+            background: #252525;
+            overflow: visible;
+        }
+
+        .timeline-track:nth-child(odd) {
+            background: #282828;
+        }
+
+        /* Timeline Clips */
+        .timeline-clip {
+            position: absolute;
+            height: 60px;
+            top: 10px;
+            background: linear-gradient(135deg, #4ecdc4, #45a085);
+            border: 2px solid #5dd5c7;
+            border-radius: 8px;
+            cursor: move;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .timeline-clip:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+        }
+
+        .timeline-clip.selected {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, #ff6b6b, #ff4757);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .timeline-clip.dragging {
+            opacity: 0.8;
+            cursor: grabbing;
+            z-index: 100;
+        }
+
+        .clip-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .clip-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        .clip-duration {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            font-family: monospace;
+        }
+
+        /* Clip Handles */
+        .clip-handle {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: ew-resize;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .timeline-clip:hover .clip-handle {
+            opacity: 1;
+        }
+
+        .clip-handle.left {
+            left: 0;
+            border-radius: 8px 0 0 8px;
+            cursor: w-resize;
+        }
+
+        .clip-handle.right {
+            right: 0;
+            border-radius: 0 8px 8px 0;
+            cursor: e-resize;
+        }
+
+        .clip-handle:hover {
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Cut Tool */
+        .cut-indicator {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ff4757;
+            cursor: pointer;
+            z-index: 50;
+            display: none;
+        }
+
+        .cut-indicator.active {
+            display: block;
+        }
+
+        /* Playhead */
+        .playhead {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #ff6b6b;
+            z-index: 200;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+
+        .playhead::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 19px;
+            height: 19px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            border: 2px solid #1e1e1e;
+        }
+
+        /* Selection Area */
+        .selection-area {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            background: rgba(78, 205, 196, 0.2);
+            border: 2px dashed #4ecdc4;
+            pointer-events: none;
+            display: none;
+            z-index: 150;
+        }
+
+        .selection-area.active {
+            display: block;
+        }
+
+        /* Zoom and Pan Controls */
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            background: rgba(45, 45, 45, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .zoom-btn {
+            background: #404040;
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: #4ecdc4;
+            color: #1e1e1e;
+        }
+
+        .zoom-slider {
+            width: 120px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+        }
+
+        .zoom-slider input {
+            width: 100%;
+            height: 4px;
+            background: #404040;
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .zoom-slider input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #4ecdc4;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Tool Panel */
+        .tool-panel {
+            position: absolute;
+            top: 20px;
+            left: 140px;
+            background: rgba(45, 45, 45, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            gap: 5px;
+        }
+
+        .tool-btn {
+            background: #404040;
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            background: #4ecdc4;
+            color: #1e1e1e;
+        }
+
+        .tool-btn.active {
+            background: #4ecdc4;
+            color: #1e1e1e;
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: absolute;
+            background: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 6px;
+            padding: 5px 0;
+            min-width: 150px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .context-menu.active {
+            display: block;
+        }
+
+        .context-menu-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .context-menu-item:hover {
+            background: #404040;
+        }
+
+        .context-menu-separator {
+            height: 1px;
+            background: #404040;
+            margin: 5px 0;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .track-labels {
+                width: 80px;
+            }
+
+            .timeline-clip {
+                height: 50px;
+                top: 15px;
+            }
+
+            .clip-name {
+                font-size: 0.8rem;
+                max-width: 100px;
+            }
+
+            .timeline-controls {
+                gap: 5px;
+            }
+
+            .timeline-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+
+            .tool-panel {
+                left: 100px;
+                padding: 5px;
+            }
+
+            .tool-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Touch-friendly enhancements */
+        @media (pointer: coarse) {
+            .timeline-clip {
+                min-height: 60px;
+            }
+
+            .clip-handle {
+                width: 12px;
+                opacity: 0.8;
+            }
+
+            .timeline-btn {
+                min-height: 44px;
+                padding: 10px 15px;
+            }
+
+            .tool-btn {
+                min-width: 44px;
+                min-height: 44px;
+            }
+        }
+
+        /* Loading and Status */
+        .timeline-status {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(45, 45, 45, 0.9);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #4ecdc4;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Waveform Visualization */
+        .waveform {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: rgba(78, 205, 196, 0.1);
+            overflow: hidden;
+        }
+
+        .waveform canvas {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="timeline-container">
+        <!-- Timeline Header -->
+        <div class="timeline-header">
+            <div class="timeline-title">🎬 Professional Timeline</div>
+            <div class="timeline-controls">
+                <button class="timeline-btn" id="playBtn">
+                    <span>▶️</span> Play
+                </button>
+                <button class="timeline-btn" id="pauseBtn">
+                    <span>⏸️</span> Pause
+                </button>
+                <button class="timeline-btn" id="stopBtn">
+                    <span>⏹️</span> Stop
+                </button>
+                <div class="time-display" id="timeDisplay">00:00.000</div>
+                <button class="timeline-btn" id="undoBtn" disabled>
+                    <span>↶</span> Undo
+                </button>
+                <button class="timeline-btn" id="redoBtn" disabled>
+                    <span>↷</span> Redo
+                </button>
+            </div>
+        </div>
+
+        <!-- Timeline Main Area -->
+        <div class="timeline-main">
+            <!-- Track Labels -->
+            <div class="track-labels" id="trackLabels">
+                <div class="track-label">
+                    <span class="track-label-text">Video 1</span>
+                    <div class="track-controls">
+                        <button class="track-control-btn active" title="Visible">👁</button>
+                        <button class="track-control-btn" title="Locked">🔒</button>
+                    </div>
+                </div>
+                <div class="track-label">
+                    <span class="track-label-text">Audio 1</span>
+                    <div class="track-controls">
+                        <button class="track-control-btn active" title="Audible">🔊</button>
+                        <button class="track-control-btn" title="Locked">🔒</button>
+                    </div>
+                </div>
+                <div class="track-label">
+                    <span class="track-label-text">Text</span>
+                    <div class="track-controls">
+                        <button class="track-control-btn active" title="Visible">👁</button>
+                        <button class="track-control-btn" title="Locked">🔒</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Canvas -->
+            <div class="timeline-canvas" id="timelineCanvas">
+                <!-- Ruler -->
+                <div class="timeline-ruler">
+                    <div class="ruler-content" id="rulerContent">
+                        <!-- Ruler marks will be generated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Tracks -->
+                <div class="timeline-tracks" id="timelineTracks">
+                    <div class="timeline-track" data-track="video1">
+                        <!-- Video clips will be added here -->
+                    </div>
+                    <div class="timeline-track" data-track="audio1">
+                        <!-- Audio clips will be added here -->
+                    </div>
+                    <div class="timeline-track" data-track="text">
+                        <!-- Text clips will be added here -->
+                    </div>
+                </div>
+
+                <!-- Playhead -->
+                <div class="playhead" id="playhead" style="left: 0px;"></div>
+
+                <!-- Selection Area -->
+                <div class="selection-area" id="selectionArea"></div>
+
+                <!-- Cut Indicator -->
+                <div class="cut-indicator" id="cutIndicator"></div>
+            </div>
+        </div>
+
+        <!-- Tool Panel -->
+        <div class="tool-panel">
+            <button class="tool-btn active" id="selectTool" title="Select Tool">⬆️</button>
+            <button class="tool-btn" id="cutTool" title="Cut Tool">✂️</button>
+            <button class="tool-btn" id="panTool" title="Pan Tool">✋</button>
+            <button class="tool-btn" id="zoomTool" title="Zoom Tool">🔍</button>
+        </div>
+
+        <!-- Zoom Controls -->
+        <div class="zoom-controls">
+            <button class="zoom-btn" id="zoomOut">−</button>
+            <div class="zoom-slider">
+                <input type="range" id="zoomSlider" min="0.1" max="5" step="0.1" value="1">
+            </div>
+            <button class="zoom-btn" id="zoomIn">+</button>
+            <button class="zoom-btn" id="fitToWindow" title="Fit to Window">📐</button>
+        </div>
+
+        <!-- Status -->
+        <div class="timeline-status" id="timelineStatus">
+            Ready | 0 clips | 00:00.000
+        </div>
+
+        <!-- Context Menu -->
+        <div class="context-menu" id="contextMenu">
+            <div class="context-menu-item" data-action="cut">
+                <span>✂️</span> Cut
+            </div>
+            <div class="context-menu-item" data-action="copy">
+                <span>📋</span> Copy
+            </div>
+            <div class="context-menu-item" data-action="paste">
+                <span>📄</span> Paste
+            </div>
+            <div class="context-menu-separator"></div>
+            <div class="context-menu-item" data-action="delete">
+                <span>🗑️</span> Delete
+            </div>
+            <div class="context-menu-separator"></div>
+            <div class="context-menu-item" data-action="duplicate">
+                <span>📑</span> Duplicate
+            </div>
+            <div class="context-menu-item" data-action="split">
+                <span>✂️</span> Split at Playhead
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ProfessionalTimeline {
+            constructor() {
+                this.clips = [];
+                this.selectedClips = [];
+                this.currentTool = 'select';
+                this.zoomLevel = 1;
+                this.pixelsPerSecond = 60;
+                this.playheadPosition = 0;
+                this.totalDuration = 300; // 5 minutes default
+                this.isPlaying = false;
+                this.isDragging = false;
+                this.isResizing = false;
+                this.dragStartX = 0;
+                this.dragStartTime = 0;
+
+                this.history = [];
+                this.historyIndex = -1;
+
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.generateRuler();
+                this.addSampleClips();
+                this.updateStatus();
+            }
+
+            bindEvents() {
+                // Playback controls
+                document.getElementById('playBtn').addEventListener('click', () => this.play());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stop());
+
+                // Tool selection
+                document.querySelectorAll('.tool-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.selectTool(e.target.id));
+                });
+
+                // Zoom controls
+                document.getElementById('zoomIn').addEventListener('click', () => this.zoomIn());
+                document.getElementById('zoomOut').addEventListener('click', () => this.zoomOut());
+                document.getElementById('fitToWindow').addEventListener('click', () => this.fitToWindow());
+                document.getElementById('zoomSlider').addEventListener('input', (e) => this.setZoom(parseFloat(e.target.value)));
+
+                // Timeline interactions
+                const canvas = document.getElementById('timelineCanvas');
+
+                // Mouse events
+                canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+                canvas.addEventListener('contextmenu', (e) => this.showContextMenu(e));
+                canvas.addEventListener('wheel', (e) => this.handleWheel(e));
+
+                // Touch events for mobile
+                canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e));
+                canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e));
+                canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+
+                // Context menu
+                document.addEventListener('click', () => this.hideContextMenu());
+                document.querySelectorAll('.context-menu-item').forEach(item => {
+                    item.addEventListener('click', (e) => this.handleContextAction(e.target.dataset.action));
+                });
+
+                // Ruler click for scrubbing
+                document.getElementById('rulerContent').addEventListener('click', (e) => this.scrubToPosition(e));
+            }
+
+            generateRuler() {
+                const rulerContent = document.getElementById('rulerContent');
+                rulerContent.innerHTML = '';
+
+                const totalWidth = this.totalDuration * this.pixelsPerSecond * this.zoomLevel;
+                rulerContent.style.width = totalWidth + 'px';
+
+                // Generate time marks
+                const step = this.zoomLevel < 0.5 ? 10 : this.zoomLevel < 1 ? 5 : 1;
+
+                for (let time = 0; time <= this.totalDuration; time += step) {
+                    const mark = document.createElement('div');
+                    mark.className = `ruler-mark ${time % 10 === 0 ? 'major' : 'second'}`;
+                    mark.style.left = (time * this.pixelsPerSecond * this.zoomLevel) + 'px';
+
+                    if (time % 5 === 0 || this.zoomLevel >= 2) {
+                        mark.textContent = this.formatTime(time);
+                    }
+
+                    rulerContent.appendChild(mark);
+                }
+            }
+
+            addSampleClips() {
+                // Add some sample clips for demonstration
+                this.addClip({
+                    id: 'clip1',
+                    name: 'Video Clip 1',
+                    track: 'video1',
+                    startTime: 2,
+                    duration: 10,
+                    type: 'video'
+                });
+
+                this.addClip({
+                    id: 'clip2',
+                    name: 'Audio Track',
+                    track: 'audio1',
+                    startTime: 0,
+                    duration: 15,
+                    type: 'audio'
+                });
+
+                this.addClip({
+                    id: 'clip3',
+                    name: 'Title Text',
+                    track: 'text',
+                    startTime: 5,
+                    duration: 8,
+                    type: 'text'
+                });
+            }
+
+            addClip(clipData) {
+                const clip = {
+                    ...clipData,
+                    selected: false
+                };
+
+                this.clips.push(clip);
+                this.renderClip(clip);
+                this.saveState();
+                this.updateStatus();
+            }
+
+            renderClip(clip) {
+                const track = document.querySelector(`[data-track="${clip.track}"]`);
+                if (!track) return;
+
+                const clipElement = document.createElement('div');
+                clipElement.className = 'timeline-clip';
+                clipElement.dataset.clipId = clip.id;
+
+                const left = clip.startTime * this.pixelsPerSecond * this.zoomLevel;
+                const width = clip.duration * this.pixelsPerSecond * this.zoomLevel;
+
+                clipElement.style.left = left + 'px';
+                clipElement.style.width = width + 'px';
+
+                clipElement.innerHTML = `
+                    <div class="clip-handle left"></div>
+                    <div class="clip-content">
+                        <div class="clip-name">${clip.name}</div>
+                        <div class="clip-duration">${this.formatTime(clip.duration)}</div>
+                    </div>
+                    <div class="clip-handle right"></div>
+                    ${clip.type === 'audio' ? '<div class="waveform"><canvas></canvas></div>' : ''}
+                `;
+
+                // Bind clip events
+                this.bindClipEvents(clipElement, clip);
+
+                track.appendChild(clipElement);
+
+                // Generate waveform for audio clips
+                if (clip.type === 'audio') {
+                    this.generateWaveform(clipElement.querySelector('canvas'), clip);
+                }
+            }
+
+            bindClipEvents(element, clip) {
+                element.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.selectClip(clip, e.ctrlKey || e.metaKey);
+                });
+
+                element.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    this.editClip(clip);
+                });
+            }
+
+            selectClip(clip, multiSelect = false) {
+                if (!multiSelect) {
+                    this.selectedClips = [];
+                    document.querySelectorAll('.timeline-clip.selected').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+                }
+
+                const index = this.selectedClips.findIndex(c => c.id === clip.id);
+                if (index === -1) {
+                    this.selectedClips.push(clip);
+                    clip.selected = true;
+                    document.querySelector(`[data-clip-id="${clip.id}"]`).classList.add('selected');
+                } else if (multiSelect) {
+                    this.selectedClips.splice(index, 1);
+                    clip.selected = false;
+                    document.querySelector(`[data-clip-id="${clip.id}"]`).classList.remove('selected');
+                }
+
+                this.updateStatus();
+            }
+
+            handleMouseDown(e) {
+                const rect = e.target.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+
+                if (this.currentTool === 'cut') {
+                    this.showCutIndicator(x);
+                } else if (this.currentTool === 'select') {
+                    this.startSelection(x, e.clientY - rect.top);
+                }
+            }
+
+            handleMouseMove(e) {
+                if (this.currentTool === 'cut') {
+                    const rect = e.target.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    this.updateCutIndicator(x);
+                }
+            }
+
+            handleMouseUp(e) {
+                if (this.currentTool === 'cut') {
+                    const rect = e.target.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const time = x / (this.pixelsPerSecond * this.zoomLevel);
+                    this.cutClipsAtTime(time);
+                    this.hideCutIndicator();
+                }
+            }
+
+            // Touch event handlers for mobile support
+            handleTouchStart(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                this.handleMouseDown({
+                    clientX: touch.clientX,
+                    clientY: touch.clientY,
+                    target: e.target
+                });
+            }
+
+            handleTouchMove(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                this.handleMouseMove({
+                    clientX: touch.clientX,
+                    clientY: touch.clientY,
+                    target: e.target
+                });
+            }
+
+            handleTouchEnd(e) {
+                e.preventDefault();
+                if (e.changedTouches.length > 0) {
+                    const touch = e.changedTouches[0];
+                    this.handleMouseUp({
+                        clientX: touch.clientX,
+                        clientY: touch.clientY,
+                        target: e.target
+                    });
+                }
+            }
+
+            showCutIndicator(x) {
+                const cutIndicator = document.getElementById('cutIndicator');
+                cutIndicator.style.left = x + 'px';
+                cutIndicator.classList.add('active');
+            }
+
+            updateCutIndicator(x) {
+                const cutIndicator = document.getElementById('cutIndicator');
+                cutIndicator.style.left = x + 'px';
+            }
+
+            hideCutIndicator() {
+                const cutIndicator = document.getElementById('cutIndicator');
+                cutIndicator.classList.remove('active');
+            }
+
+            cutClipsAtTime(time) {
+                const clipsToSplit = this.clips.filter(clip =>
+                    time > clip.startTime && time < clip.startTime + clip.duration
+                );
+
+                clipsToSplit.forEach(clip => {
+                    const splitDuration = time - clip.startTime;
+                    const newClip = {
+                        ...clip,
+                        id: clip.id + '_split_' + Date.now(),
+                        name: clip.name + ' (Split)',
+                        startTime: time,
+                        duration: clip.duration - splitDuration
+                    };
+
+                    // Modify original clip
+                    clip.duration = splitDuration;
+
+                    // Add new clip
+                    this.addClip(newClip);
+
+                    // Re-render both clips
+                    this.rerenderClip(clip);
+                });
+
+                this.saveState();
+                this.updateStatus();
+            }
+
+            rerenderClip(clip) {
+                const element = document.querySelector(`[data-clip-id="${clip.id}"]`);
+                if (element) {
+                    const width = clip.duration * this.pixelsPerSecond * this.zoomLevel;
+                    element.style.width = width + 'px';
+                    element.querySelector('.clip-duration').textContent = this.formatTime(clip.duration);
+                }
+            }
+
+            scrubToPosition(e) {
+                const rect = e.target.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const time = x / (this.pixelsPerSecond * this.zoomLevel);
+
+                this.setPlayheadPosition(Math.max(0, Math.min(time, this.totalDuration)));
+            }
+
+            setPlayheadPosition(time) {
+                this.playheadPosition = time;
+                const playhead = document.getElementById('playhead');
+                playhead.style.left = (time * this.pixelsPerSecond * this.zoomLevel) + 'px';
+
+                document.getElementById('timeDisplay').textContent = this.formatTime(time);
+            }
+
+            selectTool(toolId) {
+                document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById(toolId).classList.add('active');
+
+                this.currentTool = toolId.replace('Tool', '');
+
+                // Update cursor based on tool
+                const canvas = document.getElementById('timelineCanvas');
+                switch(this.currentTool) {
+                    case 'cut':
+                        canvas.style.cursor = 'crosshair';
+                        break;
+                    case 'pan':
+                        canvas.style.cursor = 'grab';
+                        break;
+                    case 'zoom':
+                        canvas.style.cursor = 'zoom-in';
+                        break;
+                    default:
+                        canvas.style.cursor = 'default';
+                }
+            }
+
+            zoomIn() {
+                this.setZoom(Math.min(5, this.zoomLevel * 1.2));
+            }
+
+            zoomOut() {
+                this.setZoom(Math.max(0.1, this.zoomLevel / 1.2));
+            }
+
+            setZoom(level) {
+                this.zoomLevel = level;
+                document.getElementById('zoomSlider').value = level;
+
+                this.generateRuler();
+                this.rerenderAllClips();
+                this.setPlayheadPosition(this.playheadPosition); // Update playhead position
+            }
+
+            fitToWindow() {
+                const canvas = document.getElementById('timelineCanvas');
+                const availableWidth = canvas.clientWidth - 50; // Account for padding
+                const optimalZoom = availableWidth / (this.totalDuration * this.pixelsPerSecond);
+                this.setZoom(Math.max(0.1, Math.min(5, optimalZoom)));
+            }
+
+            rerenderAllClips() {
+                this.clips.forEach(clip => {
+                    const element = document.querySelector(`[data-clip-id="${clip.id}"]`);
+                    if (element) {
+                        const left = clip.startTime * this.pixelsPerSecond * this.zoomLevel;
+                        const width = clip.duration * this.pixelsPerSecond * this.zoomLevel;
+                        element.style.left = left + 'px';
+                        element.style.width = width + 'px';
+                    }
+                });
+            }
+
+            play() {
+                if (!this.isPlaying) {
+                    this.isPlaying = true;
+                    document.getElementById('playBtn').classList.add('active');
+                    this.startPlayback();
+                }
+            }
+
+            pause() {
+                this.isPlaying = false;
+                document.getElementById('playBtn').classList.remove('active');
+                this.stopPlayback();
+            }
+
+            stop() {
+                this.isPlaying = false;
+                document.getElementById('playBtn').classList.remove('active');
+                this.stopPlayback();
+                this.setPlayheadPosition(0);
+            }
+
+            startPlayback() {
+                this.playbackInterval = setInterval(() => {
+                    if (this.playheadPosition >= this.totalDuration) {
+                        this.stop();
+                        return;
+                    }
+                    this.setPlayheadPosition(this.playheadPosition + 0.033); // ~30fps
+                }, 33);
+            }
+
+            stopPlayback() {
+                if (this.playbackInterval) {
+                    clearInterval(this.playbackInterval);
+                    this.playbackInterval = null;
+                }
+            }
+
+            handleKeyboard(e) {
+                switch(e.code) {
+                    case 'Space':
+                        e.preventDefault();
+                        if (this.isPlaying) this.pause();
+                        else this.play();
+                        break;
+                    case 'Delete':
+                    case 'Backspace':
+                        if (this.selectedClips.length > 0) {
+                            this.deleteSelectedClips();
+                        }
+                        break;
+                    case 'KeyC':
+                        if (e.ctrlKey || e.metaKey) {
+                            this.copySelectedClips();
+                        }
+                        break;
+                    case 'KeyV':
+                        if (e.ctrlKey || e.metaKey) {
+                            this.pasteClips();
+                        }
+                        break;
+                    case 'KeyZ':
+                        if (e.ctrlKey || e.metaKey) {
+                            if (e.shiftKey) this.redo();
+                            else this.undo();
+                        }
+                        break;
+                }
+            }
+
+            showContextMenu(e) {
+                e.preventDefault();
+                const contextMenu = document.getElementById('contextMenu');
+                contextMenu.style.left = e.clientX + 'px';
+                contextMenu.style.top = e.clientY + 'px';
+                contextMenu.classList.add('active');
+            }
+
+            hideContextMenu() {
+                document.getElementById('contextMenu').classList.remove('active');
+            }
+
+            handleContextAction(action) {
+                switch(action) {
+                    case 'cut':
+                        this.cutSelectedClips();
+                        break;
+                    case 'copy':
+                        this.copySelectedClips();
+                        break;
+                    case 'paste':
+                        this.pasteClips();
+                        break;
+                    case 'delete':
+                        this.deleteSelectedClips();
+                        break;
+                    case 'duplicate':
+                        this.duplicateSelectedClips();
+                        break;
+                    case 'split':
+                        this.splitAtPlayhead();
+                        break;
+                }
+                this.hideContextMenu();
+            }
+
+            deleteSelectedClips() {
+                this.selectedClips.forEach(clip => {
+                    const element = document.querySelector(`[data-clip-id="${clip.id}"]`);
+                    if (element) element.remove();
+
+                    const index = this.clips.findIndex(c => c.id === clip.id);
+                    if (index !== -1) this.clips.splice(index, 1);
+                });
+
+                this.selectedClips = [];
+                this.saveState();
+                this.updateStatus();
+            }
+
+            generateWaveform(canvas, clip) {
+                const ctx = canvas.getContext('2d');
+                const width = canvas.width = clip.duration * this.pixelsPerSecond * this.zoomLevel;
+                const height = canvas.height = 30;
+
+                ctx.fillStyle = '#4ecdc4';
+                ctx.strokeStyle = '#4ecdc4';
+
+                // Generate fake waveform for demo
+                for (let x = 0; x < width; x += 2) {
+                    const amplitude = Math.sin(x * 0.05) * Math.random() * height * 0.4;
+                    ctx.fillRect(x, height/2 - amplitude/2, 1, amplitude);
+                }
+            }
+
+            handleWheel(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    const zoomDelta = e.deltaY > 0 ? 0.9 : 1.1;
+                    this.setZoom(Math.max(0.1, Math.min(5, this.zoomLevel * zoomDelta)));
+                }
+            }
+
+            saveState() {
+                const state = {
+                    clips: JSON.parse(JSON.stringify(this.clips)),
+                    playheadPosition: this.playheadPosition,
+                    selectedClips: this.selectedClips.map(c => c.id)
+                };
+
+                this.history = this.history.slice(0, this.historyIndex + 1);
+                this.history.push(state);
+                this.historyIndex++;
+
+                // Limit history size
+                if (this.history.length > 50) {
+                    this.history.shift();
+                    this.historyIndex--;
+                }
+
+                this.updateUndoRedo();
+            }
+
+            updateUndoRedo() {
+                document.getElementById('undoBtn').disabled = this.historyIndex <= 0;
+                document.getElementById('redoBtn').disabled = this.historyIndex >= this.history.length - 1;
+            }
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                const ms = Math.floor((seconds % 1) * 1000);
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+            }
+
+            updateStatus() {
+                const clipCount = this.clips.length;
+                const selectedCount = this.selectedClips.length;
+                const duration = Math.max(...this.clips.map(c => c.startTime + c.duration), 0);
+
+                const status = `${selectedCount > 0 ? selectedCount + ' selected | ' : ''}${clipCount} clips | ${this.formatTime(duration)}`;
+                document.getElementById('timelineStatus').textContent = status;
+            }
+
+            // Additional methods for full functionality
+            copySelectedClips() {
+                this.clipboard = this.selectedClips.map(clip => ({...clip}));
+            }
+
+            pasteClips() {
+                if (this.clipboard && this.clipboard.length > 0) {
+                    this.clipboard.forEach(clipData => {
+                        const newClip = {
+                            ...clipData,
+                            id: 'pasted_' + Date.now() + '_' + Math.random(),
+                            startTime: this.playheadPosition
+                        };
+                        this.addClip(newClip);
+                    });
+                }
+            }
+
+            duplicateSelectedClips() {
+                this.selectedClips.forEach(clip => {
+                    const newClip = {
+                        ...clip,
+                        id: 'duplicate_' + Date.now() + '_' + Math.random(),
+                        name: clip.name + ' (Copy)',
+                        startTime: clip.startTime + clip.duration
+                    };
+                    this.addClip(newClip);
+                });
+            }
+
+            splitAtPlayhead() {
+                this.cutClipsAtTime(this.playheadPosition);
+            }
+
+            editClip(clip) {
+                // Open clip properties dialog
+                const newName = prompt('Edit clip name:', clip.name);
+                if (newName && newName !== clip.name) {
+                    clip.name = newName;
+                    const element = document.querySelector(`[data-clip-id="${clip.id}"]`);
+                    if (element) {
+                        element.querySelector('.clip-name').textContent = newName;
+                    }
+                    this.saveState();
+                }
+            }
+        }
+
+        // Initialize the timeline when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.timeline = new ProfessionalTimeline();
+        });
+
+        // Export for integration with main workspace
+        window.ProfessionalTimeline = ProfessionalTimeline;

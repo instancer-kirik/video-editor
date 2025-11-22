@@ -1,0 +1,1466 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>WASM Video Editor</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+                color: #fff;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .header {
+                background: rgba(0, 0, 0, 0.2);
+                padding: 20px;
+                text-align: center;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .header p {
+                font-size: 1.2rem;
+                opacity: 0.9;
+            }
+
+            .container {
+                flex: 1;
+                display: flex;
+                gap: 20px;
+                padding: 20px;
+                max-width: 1400px;
+                margin: 0 auto;
+                width: 100%;
+            }
+
+            .sidebar {
+                width: 300px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+                padding: 20px;
+                backdrop-filter: blur(10px);
+            }
+
+            .main-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .video-area {
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 10px;
+                padding: 20px;
+                min-height: 400px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px dashed rgba(255, 255, 255, 0.3);
+            }
+
+            .timeline {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+                padding: 20px;
+                height: 150px;
+            }
+
+            .controls {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+
+            .control-group {
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 8px;
+                padding: 15px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .control-group h3 {
+                margin-bottom: 10px;
+                color: #fff;
+                font-size: 1rem;
+            }
+
+            button {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: none;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                width: 100%;
+                margin-bottom: 8px;
+            }
+
+            button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+
+            button:active {
+                transform: translateY(0);
+            }
+
+            button:disabled {
+                background: rgba(255, 255, 255, 0.2);
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .slider-container {
+                margin: 10px 0;
+            }
+
+            .slider-container label {
+                display: block;
+                margin-bottom: 5px;
+                font-size: 14px;
+                opacity: 0.9;
+            }
+
+            input[type="range"] {
+                width: 100%;
+                height: 6px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 3px;
+                outline: none;
+                -webkit-appearance: none;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 18px;
+                height: 18px;
+                background: #667eea;
+                border-radius: 50%;
+                cursor: pointer;
+            }
+
+            .status {
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 6px;
+                padding: 10px;
+                margin-top: 15px;
+                font-family: "Courier New", monospace;
+                font-size: 12px;
+                max-height: 200px;
+                overflow-y: auto;
+            }
+
+            .status-indicator {
+                display: inline-block;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                margin-right: 8px;
+                background: #ff6b6b;
+                animation: pulse 2s infinite;
+            }
+
+            .status-indicator.ready {
+                background: #51cf66;
+            }
+
+            @keyframes pulse {
+                0% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+                100% {
+                    opacity: 1;
+                }
+            }
+
+            .video-canvas {
+                max-width: 100%;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .timeline-track {
+                background: rgba(255, 255, 255, 0.1);
+                height: 40px;
+                border-radius: 20px;
+                position: relative;
+                margin: 10px 0;
+                overflow: hidden;
+            }
+
+            .timeline-progress {
+                background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+                height: 100%;
+                border-radius: 20px;
+                width: 0%;
+                transition: width 0.1s ease;
+            }
+
+            .timeline-handle {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 20px;
+                height: 20px;
+                background: white;
+                border-radius: 50%;
+                cursor: grab;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            }
+
+            .timeline-handle:active {
+                cursor: grabbing;
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    flex-direction: column;
+                    padding: 10px;
+                }
+
+                .sidebar {
+                    width: 100%;
+                }
+
+                .controls {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .loading {
+                text-align: center;
+                padding: 40px;
+                opacity: 0.7;
+            }
+
+            .loading::after {
+                content: "";
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-top: 2px solid #fff;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-left: 10px;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🎬 WASM Video Editor</h1>
+            <p>High-performance video editing powered by WebAssembly</p>
+        </div>
+
+        <div class="container">
+            <div class="sidebar">
+                <div class="control-group">
+                    <h3>
+                        <span class="status-indicator" id="wasmStatus"></span
+                        >WASM Status
+                    </h3>
+                    <div id="statusText">Loading...</div>
+                    <button id="initBtn" onclick="initializeWasm()" disabled>
+                        Initialize WASM
+                    </button>
+                </div>
+
+                <div class="control-group">
+                    <h3>🎮 Demo Mode</h3>
+                    <button onclick="enableDemoMode()" id="demoBtn">
+                        Enable Demo Mode
+                    </button>
+                    <button
+                        onclick="generateTestClips()"
+                        id="testClipsBtn"
+                        disabled
+                    >
+                        Generate Test Clips
+                    </button>
+                    <div
+                        id="demoStatus"
+                        style="font-size: 12px; margin-top: 8px; opacity: 0.8"
+                    ></div>
+                </div>
+
+                <div class="control-group">
+                    <h3>📹 Camera Controls</h3>
+                    <button
+                        id="startCameraBtn"
+                        onclick="startCamera()"
+                        disabled
+                    >
+                        Start Camera
+                    </button>
+                    <button id="stopCameraBtn" onclick="stopCamera()" disabled>
+                        Stop Camera
+                    </button>
+                    <video
+                        id="cameraVideo"
+                        style="
+                            width: 100%;
+                            height: 120px;
+                            border-radius: 6px;
+                            margin: 8px 0;
+                            display: none;
+                        "
+                        autoplay
+                        muted
+                    ></video>
+                </div>
+
+                <div class="control-group">
+                    <h3>🎥 Recording Controls</h3>
+                    <button
+                        id="startRecBtn"
+                        onclick="startRecording()"
+                        disabled
+                    >
+                        Start Recording
+                    </button>
+                    <button id="stopRecBtn" onclick="stopRecording()" disabled>
+                        Stop Recording
+                    </button>
+                    <div id="recordingStatus"></div>
+                </div>
+
+                <div class="control-group">
+                    <h3>📐 Video Settings</h3>
+                    <button onclick="setResolution(1920, 1080)">
+                        Set 1080p
+                    </button>
+                    <button onclick="setResolution(1280, 720)">Set 720p</button>
+                    <button onclick="setResolution(640, 480)">Set 480p</button>
+                    <div id="resolutionInfo"></div>
+                </div>
+
+                <div class="control-group">
+                    <h3>🎨 Effects</h3>
+                    <div class="slider-container">
+                        <label
+                            >Brightness:
+                            <span id="brightnessValue">1.0</span></label
+                        >
+                        <input
+                            type="range"
+                            id="brightnessSlider"
+                            min="0"
+                            max="3"
+                            step="0.1"
+                            value="1.0"
+                            oninput="updateBrightness(this.value)"
+                        />
+                    </div>
+                    <div class="slider-container">
+                        <label
+                            >Contrast:
+                            <span id="contrastValue">1.0</span></label
+                        >
+                        <input
+                            type="range"
+                            id="contrastSlider"
+                            min="0"
+                            max="3"
+                            step="0.1"
+                            value="1.0"
+                            oninput="updateContrast(this.value)"
+                        />
+                    </div>
+                    <div class="slider-container">
+                        <label
+                            >Saturation:
+                            <span id="saturationValue">1.0</span></label
+                        >
+                        <input
+                            type="range"
+                            id="saturationSlider"
+                            min="0"
+                            max="3"
+                            step="0.1"
+                            value="1.0"
+                            oninput="updateSaturation(this.value)"
+                        />
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>🎬 Clip Management</h3>
+                    <button onclick="addClip()" id="addClipBtn" disabled>
+                        + Add Clip
+                    </button>
+                    <button onclick="clearClips()">Clear All Clips</button>
+                    <div
+                        id="clipsList"
+                        style="
+                            max-height: 100px;
+                            overflow-y: auto;
+                            margin-top: 8px;
+                            font-size: 12px;
+                        "
+                    ></div>
+                </div>
+
+                <div class="control-group">
+                    <h3>📊 Memory Info</h3>
+                    <div id="memoryInfo">Usage: 0 / 0 KB</div>
+                    <button onclick="resetMemory()">Reset Memory</button>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="video-area" id="videoArea">
+                    <div class="loading" id="loadingText">
+                        Loading WASM module...
+                    </div>
+                    <canvas
+                        id="videoCanvas"
+                        class="video-canvas"
+                        width="640"
+                        height="480"
+                        style="display: none"
+                    ></canvas>
+                </div>
+
+                <div class="timeline">
+                    <h3>🎞️ Timeline</h3>
+                    <div class="timeline-track">
+                        <div
+                            class="timeline-progress"
+                            id="timelineProgress"
+                        ></div>
+                        <div class="timeline-handle" id="timelineHandle"></div>
+                        <div
+                            id="timelineClips"
+                            style="
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                right: 0;
+                                bottom: 0;
+                                pointer-events: none;
+                            "
+                        ></div>
+                    </div>
+                    <div
+                        style="
+                            display: flex;
+                            justify-content: space-between;
+                            margin-top: 10px;
+                            gap: 10px;
+                        "
+                    >
+                        <button onclick="setTimelineRange(0, 30)">
+                            Set Range (0-30s)
+                        </button>
+                        <button onclick="setCurrentTime(15)">
+                            Jump to 15s
+                        </button>
+                        <button onclick="playTimeline()" id="playBtn">
+                            ▶️ Play
+                        </button>
+                        <button
+                            onclick="pauseTimeline()"
+                            id="pauseBtn"
+                            style="display: none"
+                        >
+                            ⏸️ Pause
+                        </button>
+                        <div id="timeInfo">Time: 0.0s / 10.0s</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status" id="logOutput">
+            <div>Initializing video editor...</div>
+        </div>
+
+        <script>
+            let wasmInstance = null;
+            let wasmMemory = null;
+            let canvas = null;
+            let ctx = null;
+            let cameraStream = null;
+            let mediaRecorder = null;
+            let recordedChunks = [];
+            let clips = [];
+            let isPlaying = false;
+            let playStartTime = 0;
+            let playOffset = 0;
+            let demoMode = false;
+
+            // Logging function
+            function log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logOutput = document.getElementById("logOutput");
+                logOutput.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+                logOutput.scrollTop = logOutput.scrollHeight;
+                console.log(message);
+            }
+
+            // Update UI status
+            function updateStatus(message, isReady = false) {
+                const statusText = document.getElementById("statusText");
+                const statusIndicator = document.getElementById("wasmStatus");
+
+                statusText.textContent = message;
+                statusIndicator.className =
+                    "status-indicator" + (isReady ? " ready" : "");
+            }
+
+            // Load and initialize WASM
+            async function loadWasm() {
+                try {
+                    updateStatus("Loading WASM module...");
+                    log("Fetching video-editor.wasm...");
+
+                    const wasmFile = await fetch("video-editor.wasm");
+                    if (!wasmFile.ok) {
+                        throw new Error(
+                            `Failed to fetch WASM: ${wasmFile.status}`,
+                        );
+                    }
+
+                    const wasmBytes = await wasmFile.arrayBuffer();
+                    log(`WASM file loaded: ${wasmBytes.byteLength} bytes`);
+
+                    // Create WASM imports (if needed)
+                    const imports = {
+                        env: {
+                            // Add any required imports here
+                        },
+                    };
+
+                    const wasmModule = await WebAssembly.instantiate(
+                        wasmBytes,
+                        imports,
+                    );
+                    wasmInstance = wasmModule.instance;
+                    wasmMemory = wasmInstance.exports.memory;
+
+                    updateStatus("WASM loaded successfully", true);
+                    log("WASM module instantiated successfully");
+                    log(
+                        "Available exports: " +
+                            Object.keys(wasmInstance.exports).join(", "),
+                    );
+
+                    // Enable initialization button
+                    document.getElementById("initBtn").disabled = false;
+                    document.getElementById("loadingText").style.display =
+                        "none";
+                } catch (error) {
+                    updateStatus("Failed to load WASM", false);
+                    log("Error loading WASM: " + error.message);
+                    document.getElementById("loadingText").textContent =
+                        "Failed to load WASM module: " + error.message;
+                }
+            }
+
+            // Initialize the video editor
+            function initializeWasm() {
+                if (!wasmInstance) {
+                    log("WASM not loaded yet");
+                    return;
+                }
+
+                try {
+                    if (wasmInstance.exports.init_video_editor) {
+                        wasmInstance.exports.init_video_editor();
+                        log("Video editor initialized");
+
+                        // Enable all controls
+                        document.getElementById("startCameraBtn").disabled =
+                            false;
+                        document.getElementById("addClipBtn").disabled = false;
+                        document.getElementById("demoBtn").disabled = false;
+                        document.getElementById("initBtn").disabled = true;
+
+                        // Setup canvas
+                        setupCanvas();
+
+                        // Update UI
+                        updateVideoInfo();
+                        updateMemoryInfo();
+
+                        updateStatus("Ready for video editing", true);
+                    } else {
+                        throw new Error("init_video_editor function not found");
+                    }
+                } catch (error) {
+                    log("Error initializing WASM: " + error.message);
+                    updateStatus("Initialization failed", false);
+                }
+            }
+
+            // Setup canvas for video display
+            function setupCanvas() {
+                canvas = document.getElementById("videoCanvas");
+                ctx = canvas.getContext("2d");
+                canvas.style.display = "block";
+
+                // Create a test pattern
+                createTestPattern();
+            }
+
+            // Create a test pattern on canvas
+            function createTestPattern() {
+                if (!ctx) return;
+
+                const width = canvas.width;
+                const height = canvas.height;
+
+                // Create gradient background
+                const gradient = ctx.createLinearGradient(0, 0, width, height);
+                gradient.addColorStop(0, "#667eea");
+                gradient.addColorStop(1, "#764ba2");
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+
+                // Add some test shapes
+                ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+                for (let i = 0; i < 10; i++) {
+                    ctx.beginPath();
+                    ctx.arc(
+                        Math.random() * width,
+                        Math.random() * height,
+                        Math.random() * 50 + 10,
+                        0,
+                        2 * Math.PI,
+                    );
+                    ctx.fill();
+                }
+
+                // Add text
+                ctx.fillStyle = "white";
+                ctx.font = "24px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("WASM Video Editor Ready", width / 2, height / 2);
+                ctx.font = "16px Arial";
+                ctx.fillText(
+                    "Click controls to test functionality",
+                    width / 2,
+                    height / 2 + 40,
+                );
+            }
+
+            // Camera controls
+            async function startCamera() {
+                try {
+                    // Check if getUserMedia is available
+                    if (
+                        !navigator.mediaDevices ||
+                        !navigator.mediaDevices.getUserMedia
+                    ) {
+                        throw new Error(
+                            "getUserMedia not supported. Please use HTTPS or localhost.",
+                        );
+                    }
+
+                    cameraStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            facingMode: "user",
+                        },
+                        audio: true,
+                    });
+
+                    const video = document.getElementById("cameraVideo");
+                    video.srcObject = cameraStream;
+                    video.style.display = "block";
+
+                    document.getElementById("startCameraBtn").disabled = true;
+                    document.getElementById("stopCameraBtn").disabled = false;
+                    document.getElementById("startRecBtn").disabled = false;
+
+                    log("Camera started successfully");
+                } catch (error) {
+                    log("Error starting camera: " + error.message);
+
+                    // Show helpful message based on error
+                    if (error.name === "NotAllowedError") {
+                        log("Please allow camera access and try again");
+                    } else if (error.name === "NotFoundError") {
+                        log(
+                            "No camera found. You can still add clips manually.",
+                        );
+                    } else if (error.message.includes("getUserMedia")) {
+                        log(
+                            "Camera requires HTTPS or localhost. You can still use other features.",
+                        );
+                    }
+                }
+            }
+
+            function stopCamera() {
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach((track) => track.stop());
+                    cameraStream = null;
+
+                    const video = document.getElementById("cameraVideo");
+                    video.style.display = "none";
+                    video.srcObject = null;
+
+                    document.getElementById("startCameraBtn").disabled = false;
+                    document.getElementById("stopCameraBtn").disabled = true;
+                    document.getElementById("startRecBtn").disabled = true;
+                    document.getElementById("stopRecBtn").disabled = true;
+
+                    log("Camera stopped");
+                }
+            }
+
+            // Recording controls
+            function startRecording() {
+                if (!cameraStream) {
+                    log("Please start camera first to record");
+                    return;
+                }
+
+                if (!wasmInstance || !wasmInstance.exports.start_recording) {
+                    log("WASM not ready or start_recording function not found");
+                    return;
+                }
+
+                try {
+                    recordedChunks = [];
+
+                    // Try different codecs for better compatibility
+                    let options;
+                    if (
+                        MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+                    ) {
+                        options = { mimeType: "video/webm;codecs=vp9" };
+                    } else if (
+                        MediaRecorder.isTypeSupported("video/webm;codecs=vp8")
+                    ) {
+                        options = { mimeType: "video/webm;codecs=vp8" };
+                    } else if (MediaRecorder.isTypeSupported("video/webm")) {
+                        options = { mimeType: "video/webm" };
+                    } else {
+                        options = {};
+                    }
+
+                    mediaRecorder = new MediaRecorder(cameraStream, options);
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            recordedChunks.push(event.data);
+                        }
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(recordedChunks, {
+                            type: options.mimeType || "video/webm",
+                        });
+                        const url = URL.createObjectURL(blob);
+                        log(
+                            `Recording saved (${Math.round(blob.size / 1024)}KB)`,
+                        );
+
+                        // Add as a clip
+                        addClipFromBlob(blob, url);
+                    };
+
+                    mediaRecorder.start();
+                    wasmInstance.exports.start_recording();
+
+                    document.getElementById("startRecBtn").disabled = true;
+                    document.getElementById("stopRecBtn").disabled = false;
+                    document.getElementById("recordingStatus").textContent =
+                        "Recording...";
+
+                    log("Recording started successfully");
+                } catch (error) {
+                    log("Error starting recording: " + error.message);
+                }
+            }
+
+            function stopRecording() {
+                if (mediaRecorder && mediaRecorder.state === "recording") {
+                    mediaRecorder.stop();
+                }
+
+                if (wasmInstance && wasmInstance.exports.stop_recording) {
+                    wasmInstance.exports.stop_recording();
+                }
+
+                document.getElementById("startRecBtn").disabled = false;
+                document.getElementById("stopRecBtn").disabled = true;
+                document.getElementById("recordingStatus").textContent =
+                    "Stopped";
+
+                log("Recording stopped successfully");
+            }
+
+            // Video settings
+            function setResolution(width, height) {
+                if (!wasmInstance) return;
+
+                if (wasmInstance.exports.set_resolution) {
+                    wasmInstance.exports.set_resolution(width, height);
+                    log(`Resolution set to ${width}x${height}`);
+
+                    // Update canvas size
+                    canvas.width = Math.min(width, 800); // Cap display size
+                    canvas.height = Math.min(height, 600);
+                    createTestPattern();
+
+                    updateVideoInfo();
+                }
+            }
+
+            // Effects controls
+            function updateBrightness(value) {
+                if (!wasmInstance) return;
+
+                if (wasmInstance.exports.apply_brightness) {
+                    wasmInstance.exports.apply_brightness(parseFloat(value));
+                    document.getElementById("brightnessValue").textContent =
+                        value;
+                    log(`Brightness set to ${value}`);
+                }
+            }
+
+            function updateContrast(value) {
+                if (!wasmInstance) return;
+
+                if (wasmInstance.exports.apply_contrast) {
+                    wasmInstance.exports.apply_contrast(parseFloat(value));
+                    document.getElementById("contrastValue").textContent =
+                        value;
+                    log(`Contrast set to ${value}`);
+                }
+            }
+
+            function updateSaturation(value) {
+                if (!wasmInstance) return;
+
+                if (wasmInstance.exports.apply_saturation) {
+                    wasmInstance.exports.apply_saturation(parseFloat(value));
+                    document.getElementById("saturationValue").textContent =
+                        value;
+                    log(`Saturation set to ${value}`);
+                }
+            }
+
+            // Timeline controls
+            function setTimelineRange(start, end) {
+                if (!wasmInstance) return;
+
+                if (wasmInstance.exports.set_timeline_range) {
+                    wasmInstance.exports.set_timeline_range(start, end);
+                    log(`Timeline range set to ${start}-${end}s`);
+                    updateTimeInfo();
+                }
+            }
+
+            function setCurrentTime(time) {
+                if (!wasmInstance) return;
+
+                if (wasmInstance.exports.set_current_time) {
+                    wasmInstance.exports.set_current_time(time);
+                    log(`Current time set to ${time}s`);
+                    updateTimeInfo();
+                }
+            }
+
+            // Memory management
+            function resetMemory() {
+                if (!wasmInstance) return;
+
+                if (wasmInstance.exports.reset_memory) {
+                    wasmInstance.exports.reset_memory();
+                    log("Memory reset");
+                    updateMemoryInfo();
+                }
+            }
+
+            // UI update functions
+            function updateVideoInfo() {
+                if (!wasmInstance) return;
+
+                const width = wasmInstance.exports.get_width
+                    ? wasmInstance.exports.get_width()
+                    : "unknown";
+                const height = wasmInstance.exports.get_height
+                    ? wasmInstance.exports.get_height()
+                    : "unknown";
+                const fps = wasmInstance.exports.get_frame_rate
+                    ? wasmInstance.exports.get_frame_rate()
+                    : "unknown";
+
+                document.getElementById("resolutionInfo").textContent =
+                    `${width}x${height} @ ${fps}fps`;
+            }
+
+            function updateMemoryInfo() {
+                if (!wasmInstance) return;
+
+                const usage = wasmInstance.exports.get_memory_usage
+                    ? wasmInstance.exports.get_memory_usage()
+                    : 0;
+                const capacity = wasmInstance.exports.get_memory_capacity
+                    ? wasmInstance.exports.get_memory_capacity()
+                    : 0;
+
+                document.getElementById("memoryInfo").textContent =
+                    `Usage: ${Math.round(usage / 1024)}KB / ${Math.round(capacity / 1024)}KB`;
+            }
+
+            function updateTimeInfo() {
+                if (!wasmInstance) return;
+
+                const currentTime = wasmInstance.exports.get_current_time
+                    ? wasmInstance.exports.get_current_time()
+                    : 0;
+                const endTime = wasmInstance.exports.get_total_timeline_duration
+                    ? wasmInstance.exports.get_total_timeline_duration()
+                    : wasmInstance.exports.get_timeline_end
+                      ? wasmInstance.exports.get_timeline_end()
+                      : 30;
+
+                document.getElementById("timeInfo").textContent =
+                    `Time: ${currentTime.toFixed(1)}s / ${endTime.toFixed(1)}s`;
+
+                // Update timeline progress
+                if (endTime > 0) {
+                    const progress = Math.max(
+                        0,
+                        Math.min(100, (currentTime / endTime) * 100),
+                    );
+                    document.getElementById("timelineProgress").style.width =
+                        progress + "%";
+                    document.getElementById("timelineHandle").style.left =
+                        progress + "%";
+                }
+            }
+
+            // Timeline interaction
+            function setupTimelineInteraction() {
+                const track = document.querySelector(".timeline-track");
+                const handle = document.getElementById("timelineHandle");
+
+                track.addEventListener("click", (e) => {
+                    const rect = track.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const progress = Math.max(0, Math.min(1, x / rect.width));
+
+                    if (wasmInstance) {
+                        const endTime = wasmInstance.exports
+                            .get_total_timeline_duration
+                            ? wasmInstance.exports.get_total_timeline_duration()
+                            : wasmInstance.exports.get_timeline_end
+                              ? wasmInstance.exports.get_timeline_end()
+                              : 30;
+                        const newTime = progress * endTime;
+                        setCurrentTime(newTime);
+                    }
+                });
+            }
+
+            // Clip management
+            function addClip() {
+                // Create a clip based on available sources
+                const clipId = clips.length + 1;
+                let clipType, clipName;
+
+                if (cameraStream) {
+                    clipType = "camera";
+                    clipName = `Camera Clip ${clipId}`;
+                } else if (demoMode) {
+                    clipType = "demo";
+                    clipName = `Demo Clip ${clipId}`;
+                } else {
+                    clipType = "placeholder";
+                    clipName = `Placeholder ${clipId}`;
+                }
+
+                const clip = {
+                    id: clipId,
+                    name: clipName,
+                    duration: demoMode ? Math.random() * 8 + 2 : 5.0, // Random duration in demo mode
+                    startTime:
+                        clips.length > 0
+                            ? Math.max(
+                                  ...clips.map((c) => c.startTime + c.duration),
+                              ) + 0.5
+                            : 0,
+                    type: clipType,
+                };
+
+                clips.push(clip);
+
+                // Add to WASM timeline as well
+                if (wasmInstance && wasmInstance.exports.add_clip) {
+                    const nameBytes = new TextEncoder().encode(clip.name);
+                    const namePtr = wasmInstance.exports.alloc(
+                        nameBytes.length,
+                    );
+                    if (namePtr) {
+                        const nameArray = new Uint8Array(
+                            wasmInstance.exports.memory.buffer,
+                            namePtr,
+                            nameBytes.length,
+                        );
+                        nameArray.set(nameBytes);
+
+                        const clipTypeCode =
+                            clipType === "camera"
+                                ? 0
+                                : clipType === "recording"
+                                  ? 1
+                                  : 2;
+                        wasmInstance.exports.add_clip(
+                            clip.startTime,
+                            clip.duration,
+                            namePtr,
+                            nameBytes.length,
+                            clipTypeCode,
+                        );
+                    }
+                }
+
+                updateClipsList();
+                updateTimelineClips();
+                log(`Added ${clip.name} to timeline`);
+            }
+
+            function addClipFromBlob(blob, url) {
+                const clipId = clips.length + 1;
+                const clip = {
+                    id: clipId,
+                    name: `Recording ${clipId}`,
+                    duration: 10.0, // Estimate
+                    startTime: clips.length * 10,
+                    type: "recording",
+                    blob: blob,
+                    url: url,
+                };
+
+                clips.push(clip);
+                updateClipsList();
+                updateTimelineClips();
+                log(`Added recorded clip to timeline`);
+            }
+
+            function clearClips() {
+                clips.forEach((clip) => {
+                    if (clip.url) {
+                        URL.revokeObjectURL(clip.url);
+                    }
+                });
+                clips = [];
+                updateClipsList();
+                updateTimelineClips();
+                log("All clips cleared");
+            }
+
+            function updateClipsList() {
+                const clipsList = document.getElementById("clipsList");
+                if (clips.length === 0) {
+                    clipsList.innerHTML =
+                        '<div style="opacity:0.7;">No clips added</div>';
+                    return;
+                }
+
+                clipsList.innerHTML = clips
+                    .map(
+                        (clip) =>
+                            `<div style="padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.1);">
+                        ${clip.name} (${clip.duration.toFixed(1)}s)
+                        <button onclick="removeClip(${clip.id})" style="float:right; padding:1px 4px; font-size:10px;">✕</button>
+                    </div>`,
+                    )
+                    .join("");
+            }
+
+            function removeClip(clipId) {
+                const index = clips.findIndex((c) => c.id === clipId);
+                if (index >= 0) {
+                    const clip = clips[index];
+                    if (clip.url) {
+                        URL.revokeObjectURL(clip.url);
+                    }
+                    clips.splice(index, 1);
+                    updateClipsList();
+                    updateTimelineClips();
+                    log(`Removed ${clip.name}`);
+                }
+            }
+
+            function updateTimelineClips() {
+                const container = document.getElementById("timelineClips");
+                const totalDuration =
+                    wasmInstance &&
+                    wasmInstance.exports.get_total_timeline_duration
+                        ? wasmInstance.exports.get_total_timeline_duration()
+                        : Math.max(
+                              30,
+                              clips.length > 0
+                                  ? Math.max(
+                                        ...clips.map(
+                                            (c) => c.startTime + c.duration,
+                                        ),
+                                    )
+                                  : 30,
+                          );
+
+                container.innerHTML = clips
+                    .map((clip) => {
+                        const left = Math.max(
+                            0,
+                            Math.min(
+                                95,
+                                (clip.startTime / totalDuration) * 100,
+                            ),
+                        );
+                        const width = Math.max(
+                            2,
+                            Math.min(20, (clip.duration / totalDuration) * 100),
+                        );
+
+                        let color;
+                        if (clip.type === "recording") color = "#ff6b6b";
+                        else if (clip.type === "camera") color = "#51cf66";
+                        else if (clip.type === "demo" && clip.color)
+                            color = clip.color;
+                        else color = "#667eea"; // placeholder clips
+
+                        return `<div style="
+                        position: absolute;
+                        left: ${left}%;
+                        width: ${width}%;
+                        height: 100%;
+                        background: linear-gradient(135deg, ${color}, ${color}99);
+                        border-radius: 20px;
+                        border: 1px solid rgba(255,255,255,0.3);
+                        opacity: 0.8;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 10px;
+                        color: white;
+                        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+                        cursor: pointer;
+                    " title="${clip.name} - ${clip.duration.toFixed(1)}s at ${clip.startTime.toFixed(1)}s">${clip.name.replace(/^(Camera|Demo|Recording)\s+/, "")}</div>`;
+                    })
+                    .join("");
+            }
+
+            // Timeline playback
+            function playTimeline() {
+                isPlaying = true;
+                playStartTime = performance.now();
+                playOffset =
+                    wasmInstance && wasmInstance.exports.get_current_time
+                        ? wasmInstance.exports.get_current_time()
+                        : 0;
+
+                document.getElementById("playBtn").style.display = "none";
+                document.getElementById("pauseBtn").style.display =
+                    "inline-block";
+
+                updatePlayback();
+                log("Timeline playback started");
+            }
+
+            function pauseTimeline() {
+                isPlaying = false;
+                document.getElementById("playBtn").style.display =
+                    "inline-block";
+                document.getElementById("pauseBtn").style.display = "none";
+                log("Timeline playback paused");
+            }
+
+            function updatePlayback() {
+                if (!isPlaying) return;
+
+                const currentTime =
+                    (performance.now() - playStartTime) / 1000 + playOffset;
+                const endTime =
+                    wasmInstance && wasmInstance.exports.get_timeline_end
+                        ? wasmInstance.exports.get_timeline_end()
+                        : 30;
+
+                if (currentTime >= endTime) {
+                    pauseTimeline();
+                    setCurrentTime(0);
+                    return;
+                }
+
+                setCurrentTime(currentTime);
+                requestAnimationFrame(updatePlayback);
+            }
+
+            // Initialize everything when page loads
+            window.addEventListener("load", () => {
+                log("Page loaded, initializing WASM video editor...");
+                setupTimelineInteraction();
+                loadWasm();
+
+                // Update info periodically
+                setInterval(() => {
+                    if (wasmInstance) {
+                        updateMemoryInfo();
+                        updateTimeInfo();
+                    }
+                }, 1000);
+            });
+
+            // Test functions for development
+            function runTests() {
+                if (!wasmInstance) {
+                    log("Cannot run tests - WASM not loaded");
+                    return;
+                }
+
+                log("Running WASM tests...");
+
+                // Test basic math
+                if (wasmInstance.exports.test_basic_math) {
+                    const result = wasmInstance.exports.test_basic_math();
+                    log(`Basic math test result: ${result} (expected: 8)`);
+                }
+
+                // Test memory
+                if (wasmInstance.exports.test_memory) {
+                    const result = wasmInstance.exports.test_memory();
+                    log(`Memory test result: ${result} (1 = success)`);
+                }
+
+                // Test video state
+                if (wasmInstance.exports.test_video_state) {
+                    const result = wasmInstance.exports.test_video_state();
+                    log(`Video state test result: ${result} (1 = success)`);
+                }
+
+                log("Tests completed");
+            }
+
+            // Add keyboard shortcuts
+            window.addEventListener("keydown", (e) => {
+                if (e.ctrlKey) {
+                    switch (e.key) {
+                        case "r":
+                            e.preventDefault();
+                            startRecording();
+                            break;
+                        case "s":
+                            e.preventDefault();
+                            stopRecording();
+                            break;
+                        case "t":
+                            e.preventDefault();
+                            runTests();
+                            break;
+                        case "c":
+                            e.preventDefault();
+                            startCamera();
+                            break;
+                    }
+                } else {
+                    switch (e.key) {
+                        case " ":
+                            e.preventDefault();
+                            if (isPlaying) {
+                                pauseTimeline();
+                            } else {
+                                playTimeline();
+                            }
+                            break;
+                        case "+":
+                        case "=":
+                            e.preventDefault();
+                            addClip();
+                            break;
+                        case "c":
+                        case "C":
+                            e.preventDefault();
+                            if (
+                                document.getElementById("startCameraBtn")
+                                    .disabled === false
+                            ) {
+                                startCamera();
+                            }
+                            break;
+                    }
+                }
+            });
+
+            // Demo mode functions
+            function enableDemoMode() {
+                demoMode = true;
+                document.getElementById("demoBtn").disabled = true;
+                document.getElementById("testClipsBtn").disabled = false;
+                document.getElementById("demoStatus").textContent =
+                    "Demo mode enabled - camera not required";
+
+                log("Demo mode enabled - you can now add clips without camera");
+
+                // Create test pattern on canvas immediately
+                createDemoPattern();
+            }
+
+            function generateTestClips() {
+                const clipTypes = ["Intro", "Main", "Outro", "Transition"];
+                const colors = ["#ff6b6b", "#51cf66", "#667eea", "#ffd43b"];
+
+                for (let i = 0; i < 4; i++) {
+                    const clipId = clips.length + 1;
+                    const clip = {
+                        id: clipId,
+                        name: `${clipTypes[i]} Clip`,
+                        duration: Math.random() * 6 + 3, // 3-9 seconds
+                        startTime:
+                            clips.length > 0
+                                ? Math.max(
+                                      ...clips.map(
+                                          (c) => c.startTime + c.duration,
+                                      ),
+                                  ) + 0.2
+                                : 0,
+                        type: "demo",
+                        color: colors[i],
+                    };
+
+                    clips.push(clip);
+
+                    // Add to WASM
+                    if (wasmInstance && wasmInstance.exports.add_clip) {
+                        const nameBytes = new TextEncoder().encode(clip.name);
+                        const namePtr = wasmInstance.exports.alloc(
+                            nameBytes.length,
+                        );
+                        if (namePtr) {
+                            const nameArray = new Uint8Array(
+                                wasmInstance.exports.memory.buffer,
+                                namePtr,
+                                nameBytes.length,
+                            );
+                            nameArray.set(nameBytes);
+                            wasmInstance.exports.add_clip(
+                                clip.startTime,
+                                clip.duration,
+                                namePtr,
+                                nameBytes.length,
+                                2,
+                            );
+                        }
+                    }
+                }
+
+                updateClipsList();
+                updateTimelineClips();
+
+                // Update timeline range to fit all clips
+                if (clips.length > 0) {
+                    const totalDuration =
+                        Math.max(
+                            ...clips.map((c) => c.startTime + c.duration),
+                        ) + 2;
+                    setTimelineRange(0, totalDuration);
+                }
+
+                log(`Generated ${clipTypes.length} test clips for demo`);
+            }
+
+            function createDemoPattern() {
+                if (!ctx) return;
+
+                const width = canvas.width;
+                const height = canvas.height;
+
+                // Create animated background
+                const time = Date.now() * 0.001;
+
+                // Animated gradient
+                const gradient = ctx.createRadialGradient(
+                    width / 2 + Math.sin(time) * 100,
+                    height / 2 + Math.cos(time) * 50,
+                    0,
+                    width / 2,
+                    height / 2,
+                    Math.max(width, height) / 2,
+                );
+                gradient.addColorStop(0, `hsl(${(time * 50) % 360}, 70%, 60%)`);
+                gradient.addColorStop(
+                    1,
+                    `hsl(${(time * 30 + 120) % 360}, 50%, 40%)`,
+                );
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+
+                // Add moving shapes
+                ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+                for (let i = 0; i < 8; i++) {
+                    const x = (Math.sin(time + i) * width) / 4 + width / 2;
+                    const y =
+                        (Math.cos(time * 0.7 + i) * height) / 4 + height / 2;
+                    const radius = Math.sin(time * 2 + i) * 20 + 30;
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, radius, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+
+                // Add demo text
+                ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+                ctx.font = "bold 28px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("🎬 Demo Mode Active", width / 2, height / 2 - 20);
+
+                ctx.font = "16px Arial";
+                ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+                ctx.fillText(
+                    "Add clips and test timeline features",
+                    width / 2,
+                    height / 2 + 20,
+                );
+
+                // Continue animation in demo mode
+                if (demoMode) {
+                    setTimeout(
+                        () => requestAnimationFrame(createDemoPattern),
+                        100,
+                    );
+                }
+            }
+        </script>
+    </body>
+</html>

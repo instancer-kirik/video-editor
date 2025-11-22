@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Editor - Redirecting...</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #1e1e1e;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .redirect-container {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px;
+            background: #2d2d2d;
+            border-radius: 12px;
+            border: 2px solid #4ecdc4;
+        }
+        h1 {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .options {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        .btn {
+            background: #4ecdc4;
+            color: #1e1e1e;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: #45a085;
+            transform: translateY(-2px);
+        }
+        .btn.secondary {
+            background: #666;
+            color: white;
+        }
+        .btn.secondary:hover {
+            background: #777;
+        }
+        .features {
+            margin: 20px 0;
+            text-align: left;
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .feature {
+            margin: 8px 0;
+            padding: 5px 0;
+        }
+        .countdown {
+            font-size: 1.2rem;
+            color: #4ecdc4;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="redirect-container">
+        <h1>🎬 Video Editor</h1>
+
+        <p><strong>Choose your interface:</strong></p>
+
+        <div class="features">
+            <div class="feature"><strong>🎨 Professional Workspace</strong> - Full video editing with timeline, media library, and clip management</div>
+            <div class="feature"><strong>🧪 Test Interface</strong> - Technical testing with all WASM function access</div>
+        </div>
+
+        <div class="options">
+            <a href="workspace.html" class="btn">
+                🎬 Professional Workspace
+            </a>
+            <a href="index.html" class="btn secondary">
+                🧪 Test Interface
+            </a>
+        </div>
+
+        <div class="countdown" id="countdown">
+            Auto-redirecting to Professional Workspace in <span id="timer">5</span>s...
+        </div>
+    </div>
+
+    <script>
+        // Auto-redirect to workspace after 5 seconds
+        let timeLeft = 5;
+        const timer = document.getElementById('timer');
+        const countdown = document.getElementById('countdown');
+
+        const interval = setInterval(() => {
+            timeLeft--;
+            timer.textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                countdown.textContent = 'Redirecting...';
+                window.location.href = 'workspace.html';
+            }
+        }, 1000);
+
+        // Stop countdown if user clicks a button
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                clearInterval(interval);
+                countdown.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

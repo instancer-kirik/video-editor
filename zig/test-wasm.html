@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WASM Video Editor Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 3px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>WASM Video Editor Test</h1>
+    <p>Testing the video editor WASM module functionality.</p>
+
+    <div class="test-section">
+        <h3>Module Loading</h3>
+        <div id="module-status">Loading WASM module...</div>
+        <button onclick="testModuleLoaded()">Test Module</button>
+    </div>
+
+    <div class="test-section">
+        <h3>Basic Functions</h3>
+        <button onclick="testBasicMath()">Test Math</button>
+        <button onclick="testMemory()">Test Memory</button>
+        <button onclick="testVideoState()">Test Video State</button>
+        <div id="basic-tests"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Video Editor Functions</h3>
+        <button onclick="initVideoEditor()">Initialize Editor</button>
+        <button onclick="startRecording()">Start Recording</button>
+        <button onclick="stopRecording()">Stop Recording</button>
+        <button onclick="setResolution()">Set Resolution (1920x1080)</button>
+        <div id="video-tests"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Video Effects</h3>
+        <button onclick="applyBrightness()">Apply Brightness (1.5)</button>
+        <button onclick="applyContrast()">Apply Contrast (1.2)</button>
+        <button onclick="applySaturation()">Apply Saturation (1.1)</button>
+        <div id="effect-tests"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Timeline Functions</h3>
+        <button onclick="setTimelineRange()">Set Timeline (0-30s)</button>
+        <button onclick="setCurrentTime()">Set Current Time (15s)</button>
+        <div id="timeline-tests"></div>
+    </div>
+
+    <div id="output"></div>
+
+    <script>
+        let wasmModule = null;
+        let wasmInstance = null;
+
+        // Load the WASM module
+        async function loadWasm() {
+            try {
+                const wasmFile = await fetch('main.wasm');
+                const wasmBytes = await wasmFile.arrayBuffer();
+                const wasmModule = await WebAssembly.instantiate(wasmBytes, {});
+
+                wasmInstance = wasmModule.instance;
+
+                document.getElementById('module-status').innerHTML =
+                    '<div class="test-result success">✓ WASM module loaded successfully!</div>';
+
+                log('WASM module loaded successfully');
+                log('Available exports: ' + Object.keys(wasmInstance.exports).join(', '));
+
+                // Initialize the video editor
+                if (wasmInstance.exports.init_video_editor) {
+                    wasmInstance.exports.init_video_editor();
+                    log('Video editor initialized');
+                }
+
+            } catch (error) {
+                document.getElementById('module-status').innerHTML =
+                    '<div class="test-result error">✗ Failed to load WASM module: ' + error.message + '</div>';
+                log('Error loading WASM: ' + error.message);
+            }
+        }
+
+        function log(message) {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function showResult(containerId, success, message) {
+            const container = document.getElementById(containerId);
+            const resultClass = success ? 'success' : 'error';
+            const icon = success ? '✓' : '✗';
+            container.innerHTML += `<div class="test-result ${resultClass}">${icon} ${message}</div>`;
+        }
+
+        function testModuleLoaded() {
+            if (wasmInstance) {
+                showResult('module-status', true, 'Module is loaded and ready');
+                log('Module test passed');
+            } else {
+                showResult('module-status', false, 'Module not loaded');
+                log('Module test failed');
+            }
+        }
+
+        function testBasicMath() {
+            try {
+                if (wasmInstance.exports.add) {
+                    const result = wasmInstance.exports.add(5, 3);
+                    showResult('basic-tests', result === 8, `Math test: add(5,3) = ${result}`);
+                    log(`Math test: 5 + 3 = ${result}`);
+                } else {
+                    showResult('basic-tests', false, 'add function not found');
+                }
+            } catch (error) {
+                showResult('basic-tests', false, 'Math test failed: ' + error.message);
+                log('Math test error: ' + error.message);
+            }
+        }
+
+        function testMemory() {
+            try {
+                if (wasmInstance.exports.test_memory) {
+                    const result = wasmInstance.exports.test_memory();
+                    showResult('basic-tests', result === 1, `Memory test: ${result === 1 ? 'passed' : 'failed'}`);
+                    log(`Memory test result: ${result}`);
+                } else {
+                    showResult('basic-tests', false, 'test_memory function not found');
+                }
+            } catch (error) {
+                showResult('basic-tests', false, 'Memory test failed: ' + error.message);
+                log('Memory test error: ' + error.message);
+            }
+        }
+
+        function testVideoState() {
+            try {
+                if (wasmInstance.exports.test_video_state) {
+                    const result = wasmInstance.exports.test_video_state();
+                    showResult('basic-tests', result === 1, `Video state test: ${result === 1 ? 'passed' : 'failed'}`);
+                    log(`Video state test result: ${result}`);
+                } else {
+                    showResult('basic-tests', false, 'test_video_state function not found');
+                }
+            } catch (error) {
+                showResult('basic-tests', false, 'Video state test failed: ' + error.message);
+                log('Video state test error: ' + error.message);
+            }
+        }
+
+        function initVideoEditor() {
+            try {
+                if (wasmInstance.exports.init_video_editor) {
+                    wasmInstance.exports.init_video_editor();
+                    showResult('video-tests', true, 'Video editor initialized');
+                    log('Video editor initialized');
+                } else {
+                    showResult('video-tests', false, 'init_video_editor function not found');
+                }
+            } catch (error) {
+                showResult('video-tests', false, 'Init failed: ' + error.message);
+                log('Init error: ' + error.message);
+            }
+        }
+
+        function startRecording() {
+            try {
+                if (wasmInstance.exports.start_recording) {
+                    const result = wasmInstance.exports.start_recording();
+                    showResult('video-tests', result === 0, `Start recording: ${result === 0 ? 'success' : 'failed'}`);
+                    log(`Start recording result: ${result}`);
+                } else {
+                    showResult('video-tests', false, 'start_recording function not found');
+                }
+            } catch (error) {
+                showResult('video-tests', false, 'Start recording failed: ' + error.message);
+                log('Start recording error: ' + error.message);
+            }
+        }
+
+        function stopRecording() {
+            try {
+                if (wasmInstance.exports.stop_recording) {
+                    const result = wasmInstance.exports.stop_recording();
+                    showResult('video-tests', result === 0, `Stop recording: ${result === 0 ? 'success' : 'failed'}`);
+                    log(`Stop recording result: ${result}`);
+                } else {
+                    showResult('video-tests', false, 'stop_recording function not found');
+                }
+            } catch (error) {
+                showResult('video-tests', false, 'Stop recording failed: ' + error.message);
+                log('Stop recording error: ' + error.message);
+            }
+        }
+
+        function setResolution() {
+            try {
+                if (wasmInstance.exports.set_resolution) {
+                    wasmInstance.exports.set_resolution(1920, 1080);
+                    const width = wasmInstance.exports.get_width ? wasmInstance.exports.get_width() : 'unknown';
+                    const height = wasmInstance.exports.get_height ? wasmInstance.exports.get_height() : 'unknown';
+                    showResult('video-tests', true, `Resolution set to ${width}x${height}`);
+                    log(`Resolution set to ${width}x${height}`);
+                } else {
+                    showResult('video-tests', false, 'set_resolution function not found');
+                }
+            } catch (error) {
+                showResult('video-tests', false, 'Set resolution failed: ' + error.message);
+                log('Set resolution error: ' + error.message);
+            }
+        }
+
+        function applyBrightness() {
+            try {
+                if (wasmInstance.exports.apply_brightness) {
+                    wasmInstance.exports.apply_brightness(1.5);
+                    const brightness = wasmInstance.exports.get_brightness ? wasmInstance.exports.get_brightness() : 'unknown';
+                    showResult('effect-tests', true, `Brightness set to ${brightness}`);
+                    log(`Brightness set to ${brightness}`);
+                } else {
+                    showResult('effect-tests', false, 'apply_brightness function not found');
+                }
+            } catch (error) {
+                showResult('effect-tests', false, 'Apply brightness failed: ' + error.message);
+                log('Apply brightness error: ' + error.message);
+            }
+        }
+
+        function applyContrast() {
+            try {
+                if (wasmInstance.exports.apply_contrast) {
+                    wasmInstance.exports.apply_contrast(1.2);
+                    const contrast = wasmInstance.exports.get_contrast ? wasmInstance.exports.get_contrast() : 'unknown';
+                    showResult('effect-tests', true, `Contrast set to ${contrast}`);
+                    log(`Contrast set to ${contrast}`);
+                } else {
+                    showResult('effect-tests', false, 'apply_contrast function not found');
+                }
+            } catch (error) {
+                showResult('effect-tests', false, 'Apply contrast failed: ' + error.message);
+                log('Apply contrast error: ' + error.message);
+            }
+        }
+
+        function applySaturation() {
+            try {
+                if (wasmInstance.exports.apply_saturation) {
+                    wasmInstance.exports.apply_saturation(1.1);
+                    const saturation = wasmInstance.exports.get_saturation ? wasmInstance.exports.get_saturation() : 'unknown';
+                    showResult('effect-tests', true, `Saturation set to ${saturation}`);
+                    log(`Saturation set to ${saturation}`);
+                } else {
+                    showResult('effect-tests', false, 'apply_saturation function not found');
+                }
+            } catch (error) {
+                showResult('effect-tests', false, 'Apply saturation failed: ' + error.message);
+                log('Apply saturation error: ' + error.message);
+            }
+        }
+
+        function setTimelineRange() {
+            try {
+                if (wasmInstance.exports.set_timeline_range) {
+                    wasmInstance.exports.set_timeline_range(0.0, 30.0);
+                    const start = wasmInstance.exports.get_timeline_start ? wasmInstance.exports.get_timeline_start() : 'unknown';
+                    const end = wasmInstance.exports.get_timeline_end ? wasmInstance.exports.get_timeline_end() : 'unknown';
+                    showResult('timeline-tests', true, `Timeline range set to ${start}-${end}s`);
+                    log(`Timeline range set to ${start}-${end}s`);
+                } else {
+                    showResult('timeline-tests', false, 'set_timeline_range function not found');
+                }
+            } catch (error) {
+                showResult('timeline-tests', false, 'Set timeline range failed: ' + error.message);
+                log('Set timeline range error: ' + error.message);
+            }
+        }
+
+        function setCurrentTime() {
+            try {
+                if (wasmInstance.exports.set_current_time) {
+                    wasmInstance.exports.set_current_time(15.0);
+                    const currentTime = wasmInstance.exports.get_current_time ? wasmInstance.exports.get_current_time() : 'unknown';
+                    showResult('timeline-tests', true, `Current time set to ${currentTime}s`);
+                    log(`Current time set to ${currentTime}s`);
+                } else {
+                    showResult('timeline-tests', false, 'set_current_time function not found');
+                }
+            } catch (error) {
+                showResult('timeline-tests', false, 'Set current time failed: ' + error.message);
+                log('Set current time error: ' + error.message);
+            }
+        }
+
+        // Load WASM on page load
+        window.addEventListener('load', loadWasm);
+    </script>
+</body>
+</html>

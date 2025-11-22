@@ -1,0 +1,792 @@
+[gd_scene load_steps=5 format=3 uid="uid://b6x8uy0xtdw1q"]
+
+[ext_resource type="Script" path="res://scripts/video_player.gd" id="1_2k3m4"]
+[ext_resource type="Script" path="res://scripts/video_feed.gd" id="1_u2v3w"]
+[ext_resource type="Script" path="res://scripts/timeline_editor.gd" id="2_x4y5z"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1"]
+bg_color = Color(0.2, 0.2, 0.2, 0.8)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2k3m4")
+
+[node name="VideoFeed" type="Node" parent="."]
+script = ExtResource("1_u2v3w")
+
+[node name="Camera" type="Camera2D" parent="."]
+position = Vector2(576, 324)
+
+[node name="CameraViewport" type="SubViewport" parent="."]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="CameraFeed" type="Camera2D" parent="CameraViewport"]
+position = Vector2(576, 324)
+
+[node name="VideoPlayer" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand = true
+
+[node name="TimelineEditor" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Timeline" type="ColorRect" parent="TimelineEditor"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -220.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2, 0.2, 0.2, 1)
+
+[node name="PositionIndicator" type="ColorRect" parent="TimelineEditor"]
+custom_minimum_size = Vector2(2, 0)
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
+color = Color(1, 0, 0, 1)
+
+[node name="TrimStart" type="ColorRect" parent="TimelineEditor"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
+color = Color(0, 1, 0, 1)
+
+[node name="TrimEnd" type="ColorRect" parent="TimelineEditor"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
+color = Color(0, 1, 0, 1)
+
+[node name="SpeedControl" type="HSlider" parent="TimelineEditor"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -30.0
+offset_right = -20.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
+min_value = 0.25
+max_value = 2.0
+step = 0.25
+value = 1.0
+
+[node name="TrimPreview" type="VideoStreamPlayer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand = true
+
+[node name="TrackingOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TrackingPoint" type="ColorRect" parent="TrackingOverlay"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 0
+offset_right = 10.0
+offset_bottom = 10.0
+color = Color(1, 0, 0, 0.5)
+
+[node name="TrackingBox" type="ColorRect" parent="TrackingOverlay"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 0
+offset_right = 50.0
+offset_bottom = 50.0
+color = Color(0, 1, 0, 0.2)
+
+[node name="Background" type="Panel" parent="VideoPlayer/TimelineEditor"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_1")
+
+[node name="Timeline" type="TextureProgressBar" parent="VideoPlayer/TimelineEditor"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = -10.0
+offset_right = -20.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+nine_patch_stretch = true
+stretch_margin_left = 5
+stretch_margin_right = 5
+
+[node name="StartHandle" type="TextureRect" parent="VideoPlayer/TimelineEditor/Timeline"]
+layout_mode = 0
+offset_left = -10.0
+offset_top = -15.0
+offset_right = 10.0
+offset_bottom = 35.0
+mouse_default_cursor_shape = 10
+
+[node name="EndHandle" type="TextureRect" parent="VideoPlayer/TimelineEditor/Timeline"]
+layout_mode = 0
+offset_left = -10.0
+offset_top = -15.0
+offset_right = 10.0
+offset_bottom = 35.0
+mouse_default_cursor_shape = 10
+
+[node name="PositionIndicator" type="TextureRect" parent="VideoPlayer/TimelineEditor/Timeline"]
+layout_mode = 0
+offset_left = -2.0
+offset_top = -20.0
+offset_right = 2.0
+offset_bottom = 40.0
+
+[node name="SpeedControl" type="HSlider" parent="VideoPlayer/TimelineEditor"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -30.0
+offset_right = -20.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
+min_value = 0.25
+max_value = 2.0
+step = 0.25
+value = 1.0
+
+[node name="Controls" type="VBoxContainer" parent="VideoPlayer"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_right = -20.0
+grow_horizontal = 0
+grow_vertical = 2
+alignment = 1
+
+[node name="ProfileButton" type="Button" parent="VideoPlayer/Controls"]
+layout_mode = 2
+text = "👤"
+flat = true
+
+[node name="SoundButton" type="Button" parent="VideoPlayer/Controls"]
+layout_mode = 2
+text = "🔊"
+flat = true
+
+[node name="SubtitlesButton" type="Button" parent="VideoPlayer/Controls"]
+layout_mode = 2
+text = "CC"
+flat = true
+
+[node name="TranslateButton" type="Button" parent="VideoPlayer/Controls"]
+layout_mode = 2
+text = "🌐"
+flat = true
+
+[node name="LikeButton" type="Button" parent="VideoPlayer/Controls"]
+layout_mode = 2
+text = "♥"
+flat = true
+
+[node name="BookmarkButton" type="Button" parent="VideoPlayer/Controls"]
+layout_mode = 2
+text = "🔖"
+flat = true
+
+[node name="ShareButton" type="Button" parent="VideoPlayer/Controls"]
+layout_mode = 2
+text = "↗"
+flat = true
+
+[node name="CommentButton" type="Button" parent="VideoPlayer/Controls"]
+layout_mode = 2
+text = "💬"
+flat = true
+
+[node name="Info" type="VBoxContainer" parent="VideoPlayer"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -150.0
+offset_right = 300.0
+offset_left = 20.0
+grow_vertical = 0
+alignment = 2
+
+[node name="AuthorContainer" type="HBoxContainer" parent="VideoPlayer/Info"]
+layout_mode = 2
+
+[node name="AuthorLabel" type="Label" parent="VideoPlayer/Info/AuthorContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "@username"
+
+[node name="FollowButton" type="Button" parent="VideoPlayer/Info/AuthorContainer"]
+layout_mode = 2
+text = "Follow"
+flat = true
+
+[node name="DescriptionLabel" type="Label" parent="VideoPlayer/Info"]
+layout_mode = 2
+text = "Video description goes here"
+autowrap_mode = 3
+
+[node name="SoundName" type="Label" parent="VideoPlayer/Info"]
+layout_mode = 2
+text = "♫ Original Sound"
+
+[node name="SubtitlesOverlay" type="PanelContainer" parent="VideoPlayer"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -200.0
+offset_bottom = -160.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="SubtitlesLabel" type="Label" parent="VideoPlayer/SubtitlesOverlay"]
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TranslatePopup" type="PopupPanel" parent="VideoPlayer"]
+size = Vector2i(200, 250)
+visible = false
+
+[node name="TranslateOptions" type="VBoxContainer" parent="VideoPlayer/TranslatePopup"]
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 196.0
+offset_bottom = 246.0
+
+[node name="Label" type="Label" parent="VideoPlayer/TranslatePopup/TranslateOptions"]
+layout_mode = 2
+text = "Select Language"
+horizontal_alignment = 1
+
+[node name="LanguageList" type="ItemList" parent="VideoPlayer/TranslatePopup/TranslateOptions"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[connection signal="pressed" from="VideoPlayer/Controls/ExportButton" to="VideoPlayer" method="export_trimmed_video"]
+
+[node name="SubtitleEditor" type="Panel" parent="VideoPlayer"]
+visible = false
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -400.0
+offset_right = 0.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VideoPlayer/SubtitleEditor"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/Header"]
+layout_mode = 2
+text = "Subtitle Editor"
+
+[node name="HSeparator" type="HSeparator" parent="VideoPlayer/SubtitleEditor/VBoxContainer"]
+layout_mode = 2
+
+[node name="Tools" type="HBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer"]
+layout_mode = 2
+
+[node name="UndoButton" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/Tools"]
+layout_mode = 2
+text = "↩"
+tooltip_text = "Undo (Ctrl+Z)"
+
+[node name="RedoButton" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/Tools"]
+layout_mode = 2
+text = "↪"
+tooltip_text = "Redo (Ctrl+Shift+Z)"
+
+[node name="VSeparator1" type="VSeparator" parent="VideoPlayer/SubtitleEditor/VBoxContainer/Tools"]
+layout_mode = 2
+
+[node name="AddButton" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/Tools"]
+layout_mode = 2
+text = "Add Entry"
+
+[node name="AutoGenButton" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/Tools"]
+layout_mode = 2
+text = "Auto Generate"
+
+[node name="VSeparator2" type="VSeparator" parent="VideoPlayer/SubtitleEditor/VBoxContainer/Tools"]
+layout_mode = 2
+
+[node name="ImportButton" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/Tools"]
+layout_mode = 2
+text = "Import SRT"
+
+[node name="ExportButton" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/Tools"]
+layout_mode = 2
+text = "Export SRT"
+
+[node name="LayerContainer" type="VBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer"]
+layout_mode = 2
+
+[node name="Header" type="HBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/Header"]
+layout_mode = 2
+text = "Layers"
+
+[node name="AddLayerButton" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/Header"]
+layout_mode = 2
+text = "+"
+tooltip_text = "Add Layer"
+
+[node name="AddVideoButton" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/Header"]
+layout_mode = 2
+text = "🎥"
+tooltip_text = "Add Video Layer"
+
+[node name="AddMaskButton" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/Header"]
+layout_mode = 2
+text = "⬚"
+tooltip_text = "Add Mask Layer"
+
+[node name="LayerList" type="ItemList" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 100)
+allow_reselect = true
+allow_rmb_select = true
+
+[node name="LayerOptions" type="PopupMenu" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer"]
+size = Vector2i(200, 200)
+item_count = 8
+item_0/text = "Rename Layer"
+item_0/id = 0
+item_1/text = "Duplicate Layer"
+item_1/id = 1
+item_2/text = "Merge Down"
+item_2/id = 2
+item_3/text = "Delete Layer"
+item_3/id = 3
+item_4/text = "Add Mask"
+item_4/id = 4
+item_5/text = "Blend Mode"
+item_5/id = 5
+item_6/text = "Transform"
+item_6/id = 6
+item_7/text = "Effects"
+item_7/id = 7
+
+[node name="BlendModeMenu" type="PopupMenu" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer"]
+size = Vector2i(150, 200)
+item_count = 7
+item_0/text = "Normal"
+item_0/id = 0
+item_1/text = "Multiply"
+item_1/id = 1
+item_2/text = "Screen"
+item_2/id = 2
+item_3/text = "Overlay"
+item_3/id = 3
+item_4/text = "Add"
+item_4/id = 4
+item_5/text = "Subtract"
+item_5/id = 5
+item_6/text = "Alpha"
+item_6/id = 6
+
+[node name="LayerProperties" type="PanelContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties"]
+layout_mode = 2
+
+[node name="Opacity" type="HBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/Opacity"]
+layout_mode = 2
+text = "Opacity:"
+
+[node name="Slider" type="HSlider" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/Opacity"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="Transform" type="GridContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer"]
+layout_mode = 2
+columns = 4
+
+[node name="ScaleLabel" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/Transform"]
+layout_mode = 2
+text = "Scale:"
+
+[node name="ScaleX" type="SpinBox" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/Transform"]
+layout_mode = 2
+min_value = 0.01
+max_value = 10.0
+step = 0.01
+value = 1.0
+suffix = "x"
+
+[node name="ScaleY" type="SpinBox" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/Transform"]
+layout_mode = 2
+min_value = 0.01
+max_value = 10.0
+step = 0.01
+value = 1.0
+suffix = "y"
+
+[node name="LinkScale" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/Transform"]
+layout_mode = 2
+toggle_mode = true
+text = "🔗"
+
+[node name="RotateLabel" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/Transform"]
+layout_mode = 2
+text = "Rotate:"
+
+[node name="Rotation" type="SpinBox" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/Transform"]
+layout_mode = 2
+max_value = 360.0
+suffix = "°"
+
+[node name="MaskSettings" type="VBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer"]
+layout_mode = 2
+
+[node name="Header" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings"]
+layout_mode = 2
+text = "Mask Settings"
+
+[node name="Type" type="HBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings/Type"]
+layout_mode = 2
+text = "Type:"
+
+[node name="OptionButton" type="OptionButton" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings/Type"]
+layout_mode = 2
+item_count = 4
+popup/item_0/text = "Alpha"
+popup/item_0/id = 0
+popup/item_1/text = "Luminance"
+popup/item_1/id = 1
+popup/item_2/text = "Color Key"
+popup/item_2/id = 2
+popup/item_3/text = "Draw"
+popup/item_3/id = 3
+
+[node name="ColorKey" type="HBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings/ColorKey"]
+layout_mode = 2
+text = "Key Color:"
+
+[node name="ColorPicker" type="ColorPickerButton" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings/ColorKey"]
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0, 1, 0, 1)
+
+[node name="Tolerance" type="HBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings/Tolerance"]
+layout_mode = 2
+text = "Tolerance:"
+
+[node name="Slider" type="HSlider" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings/Tolerance"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 0.1
+
+[node name="Feather" type="HBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings/Feather"]
+layout_mode = 2
+text = "Feather:"
+
+[node name="Slider" type="HSlider" parent="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings/Feather"]
+layout_mode = 2
+size_flags_horizontal = 3
+item_count = 3
+popup/item_0/text = "Bottom"
+popup/item_1/text = "Middle"
+popup/item_2/text = "Top"
+
+[node name="SubtitleList" type="ItemList" parent="VideoPlayer/SubtitleEditor/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EditContainer" type="VBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer"]
+layout_mode = 2
+
+[node name="TimeContainer" type="HBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/EditContainer"]
+layout_mode = 2
+
+[node name="StartLabel" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/EditContainer/TimeContainer"]
+layout_mode = 2
+text = "Start:"
+
+[node name="StartTime" type="SpinBox" parent="VideoPlayer/SubtitleEditor/VBoxContainer/EditContainer/TimeContainer"]
+layout_mode = 2
+max_value = 999999.0
+step = 0.1
+
+[node name="EndLabel" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/EditContainer/TimeContainer"]
+layout_mode = 2
+text = "End:"
+
+[node name="EndTime" type="SpinBox" parent="VideoPlayer/SubtitleEditor/VBoxContainer/EditContainer/TimeContainer"]
+layout_mode = 2
+max_value = 999999.0
+step = 0.1
+
+[node name="TextEdit" type="TextEdit" parent="VideoPlayer/SubtitleEditor/VBoxContainer/EditContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+placeholder_text = "Enter subtitle text..."
+
+[node name="ButtonContainer" type="HBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/EditContainer"]
+layout_mode = 2
+
+[node name="SaveButton" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/EditContainer/ButtonContainer"]
+layout_mode = 2
+text = "Save Entry"
+
+[node name="DeleteButton" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/EditContainer/ButtonContainer"]
+layout_mode = 2
+text = "Delete Entry"
+
+[node name="EditButton" type="Button" parent="VideoPlayer/Controls"]
+layout_mode = 2
+text = "✏️"
+flat = true
+
+[node name="Compositing" type="VBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings"]
+visible = false
+layout_mode = 2
+
+[node name="TrackingMode" type="HBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/TrackingMode"]
+layout_mode = 2
+text = "Mode:"
+
+[node name="OptionButton" type="OptionButton" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/TrackingMode"]
+layout_mode = 2
+size_flags_horizontal = 3
+item_count = 4
+popup/item_0/text = "Static"
+popup/item_1/text = "Track Object"
+popup/item_2/text = "Track Face"
+popup/item_3/text = "Track Motion"
+
+[node name="TrackingControls" type="VBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing"]
+layout_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/TrackingControls"]
+layout_mode = 2
+
+[node name="SelectTrackingPoint" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/TrackingControls/Buttons"]
+layout_mode = 2
+text = "Select Point"
+
+[node name="StartTracking" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/TrackingControls/Buttons"]
+layout_mode = 2
+text = "Start Tracking"
+
+[node name="ClearTracking" type="Button" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/TrackingControls/Buttons"]
+layout_mode = 2
+text = "Clear"
+
+[node name="Offset" type="GridContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/TrackingControls"]
+layout_mode = 2
+columns = 2
+
+[node name="XLabel" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/TrackingControls/Offset"]
+layout_mode = 2
+text = "X Offset:"
+
+[node name="XOffset" type="SpinBox" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/TrackingControls/Offset"]
+layout_mode = 2
+min_value = -1000.0
+max_value = 1000.0
+suffix = "px"
+
+[node name="YLabel" type="Label" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/TrackingControls/Offset"]
+layout_mode = 2
+text = "Y Offset:"
+
+[node name="YOffset" type="SpinBox" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/TrackingControls/Offset"]
+layout_mode = 2
+min_value = -1000.0
+max_value = 1000.0
+suffix = "px"
+
+[node name="Effects" type="VBoxContainer" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing"]
+layout_mode = 2
+
+[node name="MotionBlur" type="CheckBox" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/Effects"]
+layout_mode = 2
+text = "Motion Blur"
+
+[node name="Perspective" type="CheckBox" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/Effects"]
+layout_mode = 2
+text = "Match Perspective"
+
+[node name="Scale" type="CheckBox" parent="VideoPlayer/SubtitleEditor/VBoxContainer/FontSettings/Compositing/Effects"]
+layout_mode = 2
+text = "Scale with Distance"
+
+[node name="VideoLayers" type="Control" parent="VideoPlayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MaskCanvas" type="Control" parent="VideoPlayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CameraPreview" type="TextureRect" parent="VideoPlayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CameraButton" type="Button" parent="VideoPlayer/Controls"]
+layout_mode = 2
+text = "📷"
+flat = true
+
+[connection signal="gui_input" from="TimelineEditor/Timeline" to="." method="_on_timeline_gui_input"]
+[connection signal="value_changed" from="TimelineEditor/SpeedControl" to="." method="_on_speed_changed"]
+[connection signal="pressed" from="VideoPlayer/Controls/LikeButton" to="." method="_on_like_pressed"]
+[connection signal="pressed" from="VideoPlayer/Controls/SoundButton" to="." method="_on_sound_pressed"]
+[connection signal="pressed" from="VideoPlayer/Controls/SubtitlesButton" to="." method="_on_subtitles_pressed"]
+[connection signal="pressed" from="VideoPlayer/Controls/TranslateButton" to="." method="_on_translate_pressed"]
+[connection signal="pressed" from="VideoPlayer/Controls/BookmarkButton" to="." method="_on_bookmark_pressed"]
+[connection signal="pressed" from="VideoPlayer/Controls/ShareButton" to="." method="_on_share_pressed"]
+[connection signal="pressed" from="VideoPlayer/Controls/CommentButton" to="." method="_on_comment_pressed"]
+[connection signal="pressed" from="VideoPlayer/Controls/EditButton" to="." method="_on_edit_button_pressed"]
+[connection signal="pressed" from="VideoPlayer/Info/AuthorContainer/FollowButton" to="." method="_on_follow_pressed"]
+[connection signal="item_selected" from="VideoPlayer/TranslatePopup/TranslateOptions/LanguageList" to="." method="_on_language_selected"]
+[connection signal="pressed" from="VideoPlayer/SubtitleEditor/VBoxContainer/Tools/UndoButton" to="." method="undo"]
+[connection signal="pressed" from="VideoPlayer/SubtitleEditor/VBoxContainer/Tools/RedoButton" to="." method="redo"]
+[connection signal="pressed" from="VideoPlayer/SubtitleEditor/VBoxContainer/Tools/AddButton" to="." method="_on_add_subtitle"]
+[connection signal="pressed" from="VideoPlayer/SubtitleEditor/VBoxContainer/Tools/AutoGenButton" to="." method="_on_auto_generate"]
+[connection signal="pressed" from="VideoPlayer/SubtitleEditor/VBoxContainer/Tools/ImportButton" to="." method="_on_import_srt"]
+[connection signal="pressed" from="VideoPlayer/SubtitleEditor/VBoxContainer/Tools/ExportButton" to="." method="_on_export_srt"]
+[connection signal="pressed" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/Header/AddLayerButton" to="." method="_on_add_layer_pressed"]
+[connection signal="pressed" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/Header/AddVideoButton" to="." method="_on_add_video_pressed"]
+[connection signal="pressed" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/Header/AddMaskButton" to="." method="_on_add_mask_pressed"]
+[connection signal="item_selected" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerList" to="." method="_on_layer_selected"]
+[connection signal="item_activated" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerList" to="." method="_on_layer_activated"]
+[connection signal="id_pressed" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerOptions" to="." method="_on_layer_option_selected"]
+[connection signal="id_pressed" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/BlendModeMenu" to="." method="_on_blend_mode_selected"]
+[connection signal="value_changed" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/Opacity/Slider" to="." method="_on_opacity_changed"]
+[connection signal="value_changed" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/Transform/ScaleX" to="." method="_on_scale_changed"]
+[connection signal="value_changed" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/Transform/ScaleY" to="." method="_on_scale_changed"]
+[connection signal="toggled" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/Transform/LinkScale" to="." method="_on_link_scale_toggled"]
+[connection signal="value_changed" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/Transform/Rotation" to="." method="_on_rotation_changed"]
+[connection signal="item_selected" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings/Type/OptionButton" to="." method="_on_mask_type_changed"]
+[connection signal="color_changed" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings/ColorKey/ColorPicker" to="." method="_on_key_color_changed"]
+[connection signal="value_changed" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings/Tolerance/Slider" to="." method="_on_tolerance_changed"]
+[connection signal="value_changed" from="VideoPlayer/SubtitleEditor/VBoxContainer/LayerContainer/LayerProperties/VBoxContainer/MaskSettings/Feather/Slider" to="." method="_on_feather_changed"]
+[connection signal="pressed" from="VideoPlayer/Controls/CameraButton" to="." method="_on_camera_button_pressed"] 

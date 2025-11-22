@@ -1,0 +1,173 @@
+[gd_scene load_steps=2 format=3 uid="uid://b8x9uy1xtdw2r"]
+
+[ext_resource type="Script" path="res://scripts/video_importer.gd" id="1_x5y6z"]
+
+[node name="VideoImporter" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_x5y6z")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Video Editor - Import Media"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="ImportSection" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 15
+
+[node name="ImportLabel" type="Label" parent="VBoxContainer/ImportSection"]
+layout_mode = 2
+text = "Import Media Files"
+horizontal_alignment = 1
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="VBoxContainer/ImportSection"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="ImportVideoButton" type="Button" parent="VBoxContainer/ImportSection/ButtonsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Import Video"
+tooltip_text = "Import video files (MP4, AVI, MOV, etc.)"
+
+[node name="ImportAudioButton" type="Button" parent="VBoxContainer/ImportSection/ButtonsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Import Audio"
+tooltip_text = "Import audio files (MP3, WAV, OGG, etc.)"
+
+[node name="ImportImageButton" type="Button" parent="VBoxContainer/ImportSection/ButtonsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Import Images"
+tooltip_text = "Import image files (PNG, JPG, etc.)"
+
+[node name="DropZone" type="Panel" parent="VBoxContainer/ImportSection"]
+layout_mode = 2
+size_flags_vertical = 3
+tooltip_text = "Drag and drop files here"
+
+[node name="DropLabel" type="Label" parent="VBoxContainer/ImportSection/DropZone"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Drag and drop media files here
+or use the buttons above"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MediaList" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MediaListLabel" type="Label" parent="VBoxContainer/MediaList"]
+layout_mode = 2
+text = "Imported Media"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/MediaList"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MediaItems" type="VBoxContainer" parent="VBoxContainer/MediaList/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="TimelineSection" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="TimelineLabel" type="Label" parent="VBoxContainer/TimelineSection"]
+layout_mode = 2
+text = "Timeline"
+horizontal_alignment = 1
+
+[node name="TimelineContainer" type="Panel" parent="VBoxContainer/TimelineSection"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TimelineDropZone" type="Label" parent="VBoxContainer/TimelineSection/TimelineContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Drop media files here to add to timeline"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ControlsSection" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="ClearButton" type="Button" parent="VBoxContainer/ControlsSection"]
+layout_mode = 2
+text = "Clear All"
+tooltip_text = "Clear all imported media and timeline"
+
+[node name="ExportButton" type="Button" parent="VBoxContainer/ControlsSection"]
+layout_mode = 2
+text = "Export Video"
+tooltip_text = "Export timeline to video file"
+
+[node name="CloseButton" type="Button" parent="VBoxContainer/ControlsSection"]
+layout_mode = 2
+text = "Close"
+tooltip_text = "Close video importer"
+
+[node name="FileDialog" type="FileDialog" parent="."]
+title = "Import Media"
+size = Vector2i(800, 600)
+access = 2
+file_mode = 1
+filters = PackedStringArray("*.mp4, *.avi, *.mov, *.mkv ; Video Files", "*.mp3, *.wav, *.ogg, *.flac ; Audio Files", "*.png, *.jpg, *.jpeg, *.bmp, *.tga ; Image Files")
+
+[connection signal="pressed" from="VBoxContainer/ImportSection/ButtonsContainer/ImportVideoButton" to="." method="_on_import_video_pressed"]
+[connection signal="pressed" from="VBoxContainer/ImportSection/ButtonsContainer/ImportAudioButton" to="." method="_on_import_audio_pressed"]
+[connection signal="pressed" from="VBoxContainer/ImportSection/ButtonsContainer/ImportImageButton" to="." method="_on_import_image_pressed"]
+[connection signal="gui_input" from="VBoxContainer/ImportSection/DropZone" to="." method="_on_drop_zone_gui_input"]
+[connection signal="gui_input" from="VBoxContainer/TimelineSection/TimelineContainer" to="." method="_on_timeline_gui_input"]
+[connection signal="pressed" from="VBoxContainer/ControlsSection/ClearButton" to="." method="_on_clear_pressed"]
+[connection signal="pressed" from="VBoxContainer/ControlsSection/ExportButton" to="." method="_on_export_pressed"]
+[connection signal="pressed" from="VBoxContainer/ControlsSection/CloseButton" to="." method="_on_close_pressed"]
+[connection signal="files_selected" from="FileDialog" to="." method="_on_files_selected"]

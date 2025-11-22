@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video Editor</title>
+    <style>
+        .recording-controls {
+            margin: 10px;
+            padding: 10px;
+        }
+        #preview-canvas {
+            border: 1px solid #ccc;
+        }
+        #timer-display {
+            font-family: monospace;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container"></div>
+    <script type="module">
+        import init from './video_editor.js';
+        
+        async function start() {
+            const wasm = await init();
+            // The Zig code will handle the rest through the web bindings
+        }
+        
+        start().catch(console.error);
+    </script>
+</body>
+</html> 

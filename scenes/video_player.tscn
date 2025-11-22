@@ -1,0 +1,61 @@
+[gd_scene load_steps=3 format=3 uid="uid://b6x8uy0xtdw1q"]
+
+[ext_resource type="Script" path="res://scripts/video_player.gd" id="1_2k3m4"]
+
+[node name="VideoPlayer" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2k3m4")
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand = true
+
+[node name="CameraPreview" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Controls" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+alignment = 1
+
+[node name="PlayButton" type="Button" parent="Controls"]
+layout_mode = 2
+text = "▶"
+flat = true
+
+[node name="SoundButton" type="Button" parent="Controls"]
+layout_mode = 2
+text = "🔊"
+flat = true
+
+[node name="CameraButton" type="Button" parent="Controls"]
+layout_mode = 2
+text = "📷"
+flat = true
+
+[connection signal="pressed" from="Controls/PlayButton" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="Controls/SoundButton" to="." method="_on_sound_pressed"]
+[connection signal="pressed" from="Controls/CameraButton" to="." method="_on_camera_button_pressed"] 

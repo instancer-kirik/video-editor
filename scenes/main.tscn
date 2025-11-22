@@ -1,0 +1,286 @@
+[gd_scene load_steps=5 format=3 uid="uid://b6x8uy0xtdw1q"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_u2v3w"]
+[ext_resource type="Script" path="res://scripts/video_player.gd" id="2_a4b5c"]
+[ext_resource type="PackedScene" uid="uid://c8q5y6x7n4m2p" path="res://scenes/timeline_editor.tscn" id="2_x4y5z"]
+[ext_resource type="PackedScene" uid="uid://d2x8uy0xtdw1q" path="res://scenes/mode_selector.tscn" id="3_m3n4p"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_u2v3w")
+
+[node name="ModeSelector" parent="." instance=ExtResource("3_m3n4p")]
+layout_mode = 1
+
+[node name="VideoPlayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -460.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_a4b5c")
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="VideoPlayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CameraPreview" type="TextureRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -460.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TimelineEditor" parent="." instance=ExtResource("2_x4y5z")]
+layout_mode = 1
+
+[node name="EditorPanels" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -400.0
+offset_right = -60.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="VideoPanel" type="PanelContainer" parent="EditorPanels"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CameraPanel" type="PanelContainer" parent="EditorPanels"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="EditorPanels/CameraPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="Label" parent="EditorPanels/CameraPanel/VBoxContainer"]
+layout_mode = 2
+text = "Camera Settings"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="EditorPanels/CameraPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Settings" type="VBoxContainer" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="DeviceSection" type="VBoxContainer" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/DeviceSection"]
+layout_mode = 2
+text = "Device"
+
+[node name="DeviceSelector" type="OptionButton" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/DeviceSection"]
+layout_mode = 2
+tooltip_text = "Select Camera Device"
+
+[node name="RefreshButton" type="Button" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/DeviceSection"]
+layout_mode = 2
+text = "Refresh Devices"
+
+[node name="FormatSection" type="VBoxContainer" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/FormatSection"]
+layout_mode = 2
+text = "Format"
+
+[node name="FormatSelector" type="OptionButton" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/FormatSection"]
+layout_mode = 2
+tooltip_text = "Select Video Format"
+
+[node name="ResolutionSection" type="VBoxContainer" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/ResolutionSection"]
+layout_mode = 2
+text = "Resolution"
+
+[node name="ResolutionSelector" type="OptionButton" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/ResolutionSection"]
+layout_mode = 2
+tooltip_text = "Select Resolution"
+
+[node name="FramerateSection" type="VBoxContainer" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/FramerateSection"]
+layout_mode = 2
+text = "Framerate"
+
+[node name="FramerateSelector" type="OptionButton" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/FramerateSection"]
+layout_mode = 2
+tooltip_text = "Select Framerate"
+
+[node name="ExposureSection" type="VBoxContainer" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/ExposureSection"]
+layout_mode = 2
+text = "Exposure"
+
+[node name="AutoExposure" type="CheckBox" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/ExposureSection"]
+layout_mode = 2
+text = "Auto Exposure"
+
+[node name="ExposureSlider" type="HSlider" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/ExposureSection"]
+layout_mode = 2
+min_value = -10.0
+max_value = 10.0
+
+[node name="FocusSection" type="VBoxContainer" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/FocusSection"]
+layout_mode = 2
+text = "Focus"
+
+[node name="AutoFocus" type="CheckBox" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/FocusSection"]
+layout_mode = 2
+text = "Auto Focus"
+
+[node name="FocusSlider" type="HSlider" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/FocusSection"]
+layout_mode = 2
+
+[node name="WhiteBalanceSection" type="VBoxContainer" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/WhiteBalanceSection"]
+layout_mode = 2
+text = "White Balance"
+
+[node name="AutoWB" type="CheckBox" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/WhiteBalanceSection"]
+layout_mode = 2
+text = "Auto White Balance"
+
+[node name="TempSlider" type="HSlider" parent="EditorPanels/CameraPanel/VBoxContainer/ScrollContainer/Settings/WhiteBalanceSection"]
+layout_mode = 2
+min_value = 2000.0
+max_value = 7000.0
+value = 5000.0
+
+[node name="Controls" type="VBoxContainer" parent="EditorPanels/CameraPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="EditorPanels/CameraPanel/VBoxContainer/Controls"]
+layout_mode = 2
+alignment = 1
+
+[node name="StartButton" type="Button" parent="EditorPanels/CameraPanel/VBoxContainer/Controls/Buttons"]
+layout_mode = 2
+text = "Start Camera"
+
+[node name="StopButton" type="Button" parent="EditorPanels/CameraPanel/VBoxContainer/Controls/Buttons"]
+layout_mode = 2
+text = "Stop"
+
+[node name="RecordingControls" type="VBoxContainer" parent="EditorPanels/CameraPanel/VBoxContainer/Controls"]
+layout_mode = 2
+
+[node name="RecordButton" type="Button" parent="EditorPanels/CameraPanel/VBoxContainer/Controls/RecordingControls"]
+layout_mode = 2
+text = "Record"
+
+[node name="OutputPath" type="LineEdit" parent="EditorPanels/CameraPanel/VBoxContainer/Controls/RecordingControls"]
+layout_mode = 2
+placeholder_text = "Output Path (e.g. /path/to/video.mp4)"
+
+[node name="PreviewSettings" type="VBoxContainer" parent="EditorPanels/CameraPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="EditorPanels/CameraPanel/VBoxContainer/PreviewSettings"]
+layout_mode = 2
+text = "Preview Settings"
+horizontal_alignment = 1
+
+[node name="GridCheck" type="CheckBox" parent="EditorPanels/CameraPanel/VBoxContainer/PreviewSettings"]
+layout_mode = 2
+text = "Show Grid"
+
+[node name="HistogramCheck" type="CheckBox" parent="EditorPanels/CameraPanel/VBoxContainer/PreviewSettings"]
+layout_mode = 2
+text = "Show Histogram"
+
+[node name="SubtitlesPanel" type="PanelContainer" parent="EditorPanels"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CompositingPanel" type="PanelContainer" parent="EditorPanels"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LayersPanel" type="PanelContainer" parent="EditorPanels"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="EffectsPanel" type="PanelContainer" parent="EditorPanels"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ImportButton" type="Button" parent="EditorPanels"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -40.0
+offset_right = 120.0
+offset_bottom = -10.0
+grow_vertical = 0
+text = "Import Media"
+tooltip_text = "Import video, audio, and image files"
+
+[connection signal="mode_changed" from="ModeSelector" to="." method="_on_mode_changed"]
+[connection signal="pressed" from="EditorPanels/ImportButton" to="." method="_on_import_pressed"]
