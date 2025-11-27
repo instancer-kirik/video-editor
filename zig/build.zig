@@ -43,22 +43,30 @@ pub fn build(b: *std.Build) void {
     const copy_web_step = b.step("copy-web", "Copy web assets");
 
     const copy_html = b.addInstallFile(b.path("src/web/index.html"), "web/index.html");
+    const copy_mobile_html = b.addInstallFile(b.path("src/web/mobile.html"), "web/mobile.html");
     const copy_js = b.addInstallFile(b.path("src/web/app.js"), "web/app.js");
+    const copy_mobile_js = b.addInstallFile(b.path("src/web/mobile-app.js"), "web/mobile-app.js");
     const copy_js2 = b.addInstallFile(b.path("src/web/bindings.js"), "web/bindings.js");
     const copy_js3 = b.addInstallFile(b.path("src/web/camera.js"), "web/camera.js");
     const copy_js4 = b.addInstallFile(b.path("src/web/editor.js"), "web/editor.js");
     const copy_js5 = b.addInstallFile(b.path("src/web/ui.js"), "web/ui.js");
     const copy_js6 = b.addInstallFile(b.path("src/web/video_editor.js"), "web/video_editor.js");
     const copy_css = b.addInstallFile(b.path("src/web/styles.css"), "web/styles.css");
+    const copy_manifest = b.addInstallFile(b.path("src/web/manifest.json"), "web/manifest.json");
+    const copy_sw = b.addInstallFile(b.path("src/web/sw.js"), "web/sw.js");
 
     copy_web_step.dependOn(&copy_html.step);
+    copy_web_step.dependOn(&copy_mobile_html.step);
     copy_web_step.dependOn(&copy_js.step);
+    copy_web_step.dependOn(&copy_mobile_js.step);
     copy_web_step.dependOn(&copy_js2.step);
     copy_web_step.dependOn(&copy_js3.step);
     copy_web_step.dependOn(&copy_js4.step);
     copy_web_step.dependOn(&copy_js5.step);
     copy_web_step.dependOn(&copy_js6.step);
     copy_web_step.dependOn(&copy_css.step);
+    copy_web_step.dependOn(&copy_manifest.step);
+    copy_web_step.dependOn(&copy_sw.step);
 
     // Web build step
     const web_step = b.step("web", "Build for web (WASM)");
@@ -79,11 +87,16 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_tests.step);
 
+    // Mobile build step
+    const mobile_step = b.step("mobile", "Build mobile PWA");
+    mobile_step.dependOn(b.getInstallStep());
+    mobile_step.dependOn(copy_web_step);
+
     // WASM-only build step (skip dev-server for now)
     const wasm_only_step = b.step("wasm", "Build WASM only (skip dev-server)");
     wasm_only_step.dependOn(b.getInstallStep());
     wasm_only_step.dependOn(copy_web_step);
 
-    // Default to WASM-only build to avoid dev-server issues
-    b.default_step = wasm_only_step;
+    // Default to mobile build for better mobile experience
+    b.default_step = mobile_step;
 }

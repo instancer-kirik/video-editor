@@ -1,0 +1,157 @@
+{
+  "name": "Mobile Video Recorder",
+  "short_name": "VideoRec",
+  "description": "A reliable mobile video recording app that won't crash",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "start_url": "/mobile.html",
+  "display": "fullscreen",
+  "orientation": "portrait-primary",
+  "theme_color": "#1a1a1a",
+  "background_color": "#000000",
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["photo", "video", "multimedia", "productivity"],
+  "icons": [
+    {
+      "src": "icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-mobile.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "screenshot-tablet.png",
+      "sizes": "768x1024",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "features": [
+    "camera",
+    "microphone",
+    "storage",
+    "wake-lock"
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "permissions": [
+    "camera",
+    "microphone",
+    "storage-access",
+    "wake-lock",
+    "screen-wake-lock"
+  ],
+  "file_handlers": [
+    {
+      "action": "/",
+      "accept": {
+        "video/*": [".mp4", ".webm", ".mov", ".avi"]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        {
+          "name": "video",
+          "accept": ["video/*"]
+        }
+      ]
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+video",
+      "url": "/?video=%s"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Quick Record",
+      "short_name": "Record",
+      "description": "Start recording immediately",
+      "url": "/mobile.html?quick=true",
+      "icons": [
+        {
+          "src": "icon-record-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "short_name": "Settings",
+      "description": "Open camera settings",
+      "url": "/mobile.html?settings=true",
+      "icons": [
+        {
+          "src": "icon-settings-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "display_override": ["window-controls-overlay", "fullscreen", "standalone"],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
+}
