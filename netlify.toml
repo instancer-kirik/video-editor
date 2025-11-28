@@ -1,9 +1,5 @@
 [build]
   publish = "zig/zig-out/web"
-  command = "./build-for-netlify.sh"
-
-[build.environment]
-  NODE_VERSION = "18"
 
 [[headers]]
   for = "/*.wasm"
@@ -57,8 +53,3 @@
   from = "/*"
   to = "/mobile.html"
   status = 200
-
-[dev]
-  command = "cd zig/zig-out/web && python3 -m http.server 8888"
-  port = 8888
-  publish = "zig/zig-out/web"
