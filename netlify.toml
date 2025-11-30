@@ -1,4 +1,5 @@
 [build]
+  command = "./build-for-netlify.sh"
   publish = "zig/zig-out/web"
 
 [[headers]]
