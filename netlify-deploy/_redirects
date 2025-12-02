@@ -1,0 +1,4 @@
+# SPA fallback
+/mobile /mobile.html 200
+/app /mobile.html 200
+/* /mobile.html 200

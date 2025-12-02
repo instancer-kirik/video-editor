@@ -1,0 +1,28 @@
+# Headers for proper WASM loading and security
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# WASM files
+/*.wasm
+  Content-Type: application/wasm
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Opener-Policy: same-origin
+
+# Cache static assets
+/video-editor.wasm
+  Cache-Control: public, max-age=2592000
+
+/manifest.json
+  Content-Type: application/manifest+json
+  Cache-Control: public, max-age=604800
+
+/sw.js
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /
+
+# Camera permissions for PWA
+/*
+  Permissions-Policy: camera=*, microphone=*, fullscreen=*

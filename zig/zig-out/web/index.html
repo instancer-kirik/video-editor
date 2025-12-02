@@ -1,65 +1,63 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Editor</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: system-ui, -apple-system, sans-serif;
-            background: #1a1a1a;
-            color: #fff;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        button {
-            background: #4a4a4a;
-            border: none;
-            padding: 10px 20px;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #5a5a5a;
-        }
-        #preview {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: #000;
-            margin: 20px 0;
-            border-radius: 8px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Video Editor</h1>
-        <div id="preview"></div>
-        <button onclick="testNative()">Test Native Bridge</button>
-    </div>
-
-    <script>
-        // Test native bridge
-        function testNative() {
-            if (typeof nativeLog !== 'undefined') {
-                nativeLog("Hello from JavaScript!");
-            } else {
-                console.log("Native bridge not available");
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Video Editor</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 20px;
+                font-family:
+                    system-ui,
+                    -apple-system,
+                    sans-serif;
+                background: #1a1a1a;
+                color: #fff;
             }
-        }
-
-        // Log when page is loaded
-        window.onload = () => {
-            console.log("Page loaded");
-            if (typeof nativeLog !== 'undefined') {
-                nativeLog("Page loaded");
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
             }
-        };
-    </script>
-</body>
+            button {
+                background: #4a4a4a;
+                border: none;
+                padding: 10px 20px;
+                color: white;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+            button:hover {
+                background: #5a5a5a;
+            }
+            #preview {
+                width: 100%;
+                aspect-ratio: 16/9;
+                background: #000;
+                margin: 20px 0;
+                border-radius: 8px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Video Editor</h1>
+            <div id="preview"></div>
+            <button onclick="testNative()">Test Native Bridge</button>
+        </div>
+
+        <script>
+            // Test WASM functionality
+            function testNative() {
+                console.log("Testing WASM functionality...");
+                // WASM functions will be available after module loads
+            }
+
+            // Log when page is loaded
+            window.onload = () => {
+                console.log("Page loaded");
+                console.log("Ready for WASM video processing");
+            };
+        </script>
+    </body>
 </html>

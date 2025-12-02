@@ -1,8 +1,0 @@
-{
-  "buildTime": "2025-12-01T00:09:02Z",
-  "buildEnvironment": "local",
-  "version": "1.0.0",
-  "files": [
-"app.js","bindings.js","build-info.json","camera.js","cert.pem","editor.js","icon.svg","index.html","key.pem","manifest.json","mobile-app.js","mobile.html","mobile-simple.html","README.md","serve.py","styles.css","sw.js","ui.js","video_editor.js","video-editor.wasm"
-  ]
-}

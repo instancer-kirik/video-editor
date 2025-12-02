@@ -42,6 +42,11 @@ pub fn build(b: *std.Build) void {
     // Copy web assets
     const copy_web_step = b.step("copy-web", "Copy web assets");
 
+    // Copy WASM file to web directory
+    const copy_wasm = b.addInstallArtifact(wasm_exe, .{
+        .dest_dir = .{ .override = .{ .custom = "web" } },
+    });
+
     const copy_html = b.addInstallFile(b.path("src/web/index.html"), "web/index.html");
     const copy_mobile_html = b.addInstallFile(b.path("src/web/mobile.html"), "web/mobile.html");
     const copy_js = b.addInstallFile(b.path("src/web/app.js"), "web/app.js");
@@ -55,6 +60,7 @@ pub fn build(b: *std.Build) void {
     const copy_manifest = b.addInstallFile(b.path("src/web/manifest.json"), "web/manifest.json");
     const copy_sw = b.addInstallFile(b.path("src/web/sw.js"), "web/sw.js");
 
+    copy_web_step.dependOn(&copy_wasm.step);
     copy_web_step.dependOn(&copy_html.step);
     copy_web_step.dependOn(&copy_mobile_html.step);
     copy_web_step.dependOn(&copy_js.step);
